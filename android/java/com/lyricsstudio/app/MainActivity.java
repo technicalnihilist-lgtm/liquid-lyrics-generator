@@ -2,6 +2,7 @@ package com.lyricsstudio.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
@@ -16,6 +17,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -23,11 +28,28 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
+    private static final String ASSET_HOST = "appassets.androidplatform.net";
+    private static final int REQ_FILE = 1001;
+
     private WebView web;
+    private ValueCallback<Uri[]> fileCallback;
+
+    private static String mimeOf(String path) {
+        String p = path.toLowerCase();
+        if (p.endsWith(".html")) return "text/html";
+        if (p.endsWith(".js")) return "application/javascript";
+        if (p.endsWith(".wasm")) return "application/wasm";
+        if (p.endsWith(".css")) return "text/css";
+        if (p.endsWith(".json")) return "application/json";
+        return "application/octet-stream";
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -58,9 +80,70 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(0xFFDFE9FF);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
-        web.setWebViewClient(new WebViewClient());
+
+        // lets <input type="file"> open the system picker (for importing a .gguf model)
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                             FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("*/*");
+                try {
+                    startActivityForResult(Intent.createChooser(i, "Select a GGUF model"), REQ_FILE);
+                    return true;
+                } catch (ActivityNotFoundException e) {
+                    fileCallback = null;
+                    return false;
+                }
+            }
+        });
+
+        // serve the bundled files over https so fetch()/wasm loading works inside the WebView
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri u = request.getUrl();
+                if (u != null && ASSET_HOST.equals(u.getHost())) {
+                    String path = u.getPath();
+                    if (path == null) path = "/";
+                    String asset = path.startsWith("/") ? path.substring(1) : path;
+                    try {
+                        InputStream is = getAssets().open(asset);
+                        Map<String, String> h = new HashMap<>();
+                        h.put("Access-Control-Allow-Origin", "*");
+                        h.put("Cross-Origin-Opener-Policy", "same-origin");
+                        h.put("Cross-Origin-Embedder-Policy", "require-corp");
+                        h.put("Cross-Origin-Resource-Policy", "cross-origin");
+                        h.put("Cache-Control", "no-store");
+                        return new WebResourceResponse(mimeOf(asset), null, 200, "OK", h, is);
+                    } catch (Exception e) {
+                        return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
+                    }
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+        });
+
         setContentView(web);
-        web.loadUrl("file:///android_asset/index.html");
+        web.loadUrl("https://" + ASSET_HOST + "/assets/index.html");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_FILE) {
+            if (fileCallback == null) return;
+            Uri[] result = null;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                result = new Uri[]{ data.getData() };
+            }
+            fileCallback.onReceiveValue(result);
+            fileCallback = null;
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

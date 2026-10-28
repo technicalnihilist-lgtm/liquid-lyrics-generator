@@ -36,6 +36,7 @@ Tap the gear icon, switch **Lyrics source** to *AI model*, then pick a provider 
 - **Gemini** — paste a key from [aistudio.google.com](https://aistudio.google.com) (starts with `AIza`). Lyrics come from Google's API, so this mode needs internet.
 - **OpenAI** — your own key, or any OpenAI-compatible base URL.
 - **Local AI** — talks to a model already running on your own device (Ollama on 11434, LocalAI on 8080, LM Studio on 1234 or 5000). No key, nothing leaves the phone.
+- **Model file** — import a `.gguf` model straight from your phone's storage. Nothing is downloaded and nothing is uploaded; the file you pick runs on the device. Small models (100-400 MB, e.g. Qwen2.5-0.5B or SmolLM2-135M) work best.
 
 Whatever fails, the built-in engine takes over and the exact error is shown under the button, so the app never leaves you with nothing.
 

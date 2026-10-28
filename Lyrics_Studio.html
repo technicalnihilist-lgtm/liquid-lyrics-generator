@@ -119,6 +119,7 @@ textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(255,90,60,.2)}
         <button data-p="gemini" class="on">Gemini</button>
         <button data-p="openai">OpenAI</button>
         <button data-p="local">Local AI</button>
+        <button data-p="file">Model file</button>
       </div>
       <div class="lbl" id="keyLbl">API key</div>
       <input type="password" id="keyIn" placeholder="Paste your key" autocomplete="off">
@@ -126,6 +127,11 @@ textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(255,90,60,.2)}
       <input type="text" id="modelIn" placeholder="gemini-2.0-flash" autocomplete="off">
       <div class="lbl" id="baseLbl" hidden>Base URL</div>
       <input type="text" id="baseIn" placeholder="https://api.openai.com/v1" autocomplete="off" hidden>
+      <div id="fileBox" hidden>
+        <div class="lbl">Model file from storage (.gguf)</div>
+        <input type="file" id="modelFile" accept=".gguf,application/octet-stream">
+        <p class="note">Pick a GGUF model you already have on the phone. It stays on the device — nothing is uploaded, and the app does not download it. Small models (100-400 MB) work best.</p>
+      </div>
       <div class="note" id="aiStatus" style="font-weight:600;color:var(--acc)"></div>
       <p class="note">The built-in engine works offline with no key. <b>Local AI</b> talks to a model already running on this device (Ollama, LocalAI or LM Studio on 127.0.0.1) &mdash; nothing leaves the phone and nothing is downloaded here. Gemini and OpenAI send the prompt to that provider with your own key.</p>
     </div>
@@ -652,6 +658,10 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
       out.appendChild(d);
     });
   }
+  function setStatus(msg) {
+    var el = $("aiStatus");
+    if (el) el.textContent = msg || "";
+  }
   function err(m) { $("err").textContent = m; $("err").hidden = !m; }
   function scrollTo(el) { if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
 
@@ -672,6 +682,57 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
     return d;
   }
   function setAI(cfg) { try { localStorage.setItem(AI_KEY, JSON.stringify(cfg)); } catch (e) {} }
+
+  /* ---- a GGUF file the user picked from their own storage ---- */
+  var FILEMODEL = { file: null, wllama: null, loading: null };
+
+  async function fileModelGenerate(prompt, onToken) {
+    if (!FILEMODEL.file) throw new Error("no model file imported yet");
+    if (!FILEMODEL.wllama) {
+      if (!FILEMODEL.loading) {
+        FILEMODEL.loading = (async function () {
+          setStatus("Loading model…");
+          var mod = await import("./w2/wllama.js");
+          var W = mod.Wllama || (mod.default && mod.default.Wllama);
+          if (!W) throw new Error("runtime missing");
+          var w = new W({
+            "single-thread/wllama.wasm": "./w2/single-thread/wllama.wasm",
+            "multi-thread/wllama.wasm": "./w2/multi-thread/wllama.wasm"
+          });
+          await w.loadModel([FILEMODEL.file], {
+            n_ctx: 1024,
+            n_threads: 1,
+            n_gpu_layers: 0,
+            progressCallback: function (p) {
+              if (p && p.total) setStatus("Loading model… " + Math.round((p.loaded / p.total) * 100) + "%");
+            }
+          });
+          FILEMODEL.wllama = w;
+          setStatus("Model ready — " + FILEMODEL.file.name);
+          return w;
+        })();
+      }
+      await FILEMODEL.loading;
+    }
+    var w = FILEMODEL.wllama;
+    setStatus("Writing on device…");
+    var acc = "", dec = new TextDecoder();
+    var out = await w.createCompletion(prompt, {
+      nPredict: 220,
+      temperature: 0.9,
+      onNewToken: function (tok, piece) {
+        if (piece && piece.length) {
+          acc += dec.decode(piece, { stream: true });
+          if (onToken) onToken(acc);
+        }
+      }
+    });
+    setStatus("Model ready — " + FILEMODEL.file.name);
+    if (acc.trim()) return acc.trim();
+    if (typeof out === "string") return out.trim();
+    if (out && typeof out.content === "string") return out.content.trim();
+    return "";
+  }
 
   async function localCall(base, cfg, prompt) {
     base = base.replace(/\/+$/, "");
@@ -696,7 +757,7 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
     return ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
   }
 
-  async function callAI(cfg, topic) {
+  async function callAI(cfg, topic, onToken) {
     var prompt = E.promptFor({ lang: S.lang, genre: S.genre, mood: S.mood, len: S.len, script: S.script, topic: topic });
     if (cfg.provider === "gemini") {
       var model = cfg.model || "gemini-2.0-flash";
@@ -711,6 +772,9 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
       var c = j.candidates && j.candidates[0];
       var parts = (c && c.content && c.content.parts) || [];
       return parts.map(function (p) { return p.text || ""; }).join("").trim();
+    }
+    if (cfg.provider === "file") {
+      return await fileModelGenerate(prompt, onToken);
     }
     if (cfg.provider === "local") {
       var bases = cfg.base ? [cfg.base] : [
@@ -752,10 +816,16 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
     var showBase = cfg.provider === "openai" || isLocal;
     $("baseIn").hidden = !showBase;
     $("baseLbl").hidden = !showBase;
-    $("keyIn").hidden = isLocal;
-    if ($("keyLbl")) $("keyLbl").hidden = isLocal;
+    var isFile = cfg.provider === "file";
+    $("fileBox").hidden = !isFile;
+    $("keyIn").hidden = isLocal || isFile;
+    if ($("keyLbl")) $("keyLbl").hidden = isLocal || isFile;
+    if (isFile) { $("baseIn").hidden = true; $("baseLbl").hidden = true; $("modelIn").hidden = true; }
     $("baseLbl").textContent = isLocal ? "Server (blank = auto-detect)" : "Base URL";
     $("baseIn").placeholder = isLocal ? "http://127.0.0.1:11434/v1" : "https://api.openai.com/v1";
+    if (isFile) {
+      setStatus(FILEMODEL.file ? "Model: " + FILEMODEL.file.name + " (" + Math.round(FILEMODEL.file.size / 1048576) + " MB)" : "No model file picked yet");
+    }
     $("modelIn").placeholder = cfg.provider === "gemini" ? "gemini-2.0-flash"
       : isLocal ? "blank = first model the server lists" : "gpt-4o-mini";
   }
@@ -823,6 +893,15 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
     }
   };
 
+  $("modelFile").onchange = function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    FILEMODEL.file = f;
+    FILEMODEL.wllama = null;
+    FILEMODEL.loading = null;
+    setStatus("Model: " + f.name + " (" + Math.round(f.size / 1048576) + " MB) — loads on first generate");
+  };
+
   $("clearAI").onclick = function () {
     setAI({ on: false, provider: "gemini", key: "", model: "", base: "" });
     paintAI(); toast("Key removed");
@@ -843,9 +922,9 @@ var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "
     $("copy").textContent = "Copy";
 
     var text = "", cfg = getAI();
-    if (cfg.on && (cfg.key || cfg.provider === "local")) {
+    if (cfg.on && (cfg.key || cfg.provider === "local" || cfg.provider === "file")) {
       try {
-        text = await callAI(cfg, topic);
+        text = await callAI(cfg, topic, function (partial) { last = partial; render(partial); });
         if (!text || !text.trim()) throw new Error("empty reply from " + cfg.provider);
       } catch (e) {
         var msg = (e && e.message) ? e.message : String(e);
