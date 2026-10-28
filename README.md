@@ -3,16 +3,16 @@
 A glassy, single-file lyrics generator for Android and the web — 28 languages, 14 genres, 10 moods, native script or Roman letters. Works fully offline with no account, no ads and no key. Optionally plug in your own AI key for free-form lyrics.
 
 <p align="center">
-  <img src="screenshots/01-home.jpg" width="240" alt="Lyrics Studio home screen">
-  <img src="screenshots/02-result-hindi.jpg" width="240" alt="Generated Hindi lyrics">
-  <img src="screenshots/03-result-tamil-roman.jpg" width="240" alt="Tamil lyrics in Roman letters">
+  <img src="01-home.jpg" width="240" alt="Lyrics Studio home screen">
+  <img src="02-result-hindi.jpg" width="240" alt="Generated Hindi lyrics">
+  <img src="03-result-tamil-roman.jpg" width="240" alt="Tamil lyrics in Roman letters">
 </p>
 
 ## Download
 
 | | |
 |---|---|
-| **Android APK** | [apk/LyricsStudio.apk](apk/LyricsStudio.apk) — 81 KB, Android 6.0+ |
+| **Android APK** | [LyricsStudio.apk](LyricsStudio.apk) — 85 KB, Android 6.0+ |
 | **Web app** | [Lyrics_Studio.html](Lyrics_Studio.html) — one file, open it in any browser |
 
 The APK is signed with a self-signed certificate, so Android will ask you to allow installing from unknown sources the first time. It is not on the Play Store.
@@ -53,12 +53,13 @@ The web app is the whole product; the Android app is a thin WebView shell around
 ```bash
 # web: nothing to build, just open the file
 open Lyrics_Studio.html
-
-# android: see android/build.sh — needs a JDK 17 and Android SDK build-tools 34
-cd android && ./build.sh
 ```
 
-`android/build.sh` runs `aapt2` → `javac` → `d8` → `zipalign` → `apksigner` by hand, so Gradle is not required. It writes a signed APK to `apk/LyricsStudio.apk`.
+The Android side — Java source, manifest, resources, and a `build.sh` that compiles the APK by hand with aapt2, javac, d8, zipalign and apksigner (no Gradle) — is inside `lyrics-studio-repo.zip` in this repository. Unzip it and run:
+
+```bash
+cd android && ANDROID_SDK=/path/to/sdk ./build.sh
+```
 
 ## Privacy
 
