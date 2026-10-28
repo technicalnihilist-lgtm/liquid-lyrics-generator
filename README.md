@@ -62,6 +62,14 @@ The Android source lives in `android/` — Java, manifest, resources, and a `bui
 ```bash
 cd android
 cp ../Lyrics_Studio.html assets/index.html
+
+# on-device inference runtime (not committed — 3.8 MB of wasm)
+npm i @wllama/wllama@2.3.2
+mkdir -p assets/w2/single-thread assets/w2/multi-thread
+cp node_modules/@wllama/wllama/esm/index.min.js   assets/w2/wllama.js
+cp node_modules/@wllama/wllama/esm/single-thread/wllama.wasm assets/w2/single-thread/
+cp node_modules/@wllama/wllama/esm/multi-thread/wllama.wasm  assets/w2/multi-thread/
+
 ANDROID_SDK=/path/to/sdk ./build.sh
 ```
 
