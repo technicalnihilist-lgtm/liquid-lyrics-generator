@@ -3,16 +3,16 @@
 A glassy, single-file lyrics generator for Android and the web — 28 languages, 14 genres, 10 moods, native script or Roman letters. Works fully offline with no account, no ads and no key. Optionally plug in your own AI key for free-form lyrics.
 
 <p align="center">
-  <img src="01-home.jpg" width="240" alt="Lyrics Studio home screen">
-  <img src="02-result-hindi.jpg" width="240" alt="Generated Hindi lyrics">
-  <img src="03-result-tamil-roman.jpg" width="240" alt="Tamil lyrics in Roman letters">
+  <img src="screenshots/01-home.jpg" width="240" alt="Lyrics Studio home screen">
+  <img src="screenshots/02-result-hindi.jpg" width="240" alt="Generated Hindi lyrics">
+  <img src="screenshots/03-result-tamil-roman.jpg" width="240" alt="Tamil lyrics in Roman letters">
 </p>
 
 ## Download
 
 | | |
 |---|---|
-| **Android APK** | [LyricsStudio.apk](LyricsStudio.apk) — 85 KB, Android 6.0+ |
+| **Android APK** | [apk/LyricsStudio.apk](apk/LyricsStudio.apk) — 81 KB, Android 6.0+ |
 | **Web app** | [Lyrics_Studio.html](Lyrics_Studio.html) — one file, open it in any browser |
 
 The APK is signed with a self-signed certificate, so Android will ask you to allow installing from unknown sources the first time. It is not on the Play Store.
@@ -31,12 +31,13 @@ You describe an idea, pick a language, genre, mood and length, and it writes an 
 
 ## Bring your own AI (optional)
 
-Tap the gear icon, switch **Lyrics source** to *AI model*, and pick a provider:
+Tap the gear icon, switch **Lyrics source** to *AI model*, then pick a provider and press **Test key** — it tells you immediately whether the key works, instead of failing silently.
 
-- **Local AI** — talks to a model already running on your own device. No key, no account, no download here. It looks for an OpenAI-compatible server on `127.0.0.1` (Ollama on 11434, LocalAI on 8080, LM Studio on 1234, or 5000) and uses the first one that answers; you can also type the server address yourself. If it finds nothing, it falls back to the built-in engine. Small models (1B or under) run in 1-2 GB of RAM and stay entirely on the phone.
-- **Gemini** or **OpenAI** — paste your own API key and the prompt goes straight to that provider.
+- **Gemini** — paste a key from [aistudio.google.com](https://aistudio.google.com) (starts with `AIza`). Lyrics come from Google's API, so this mode needs internet.
+- **OpenAI** — your own key, or any OpenAI-compatible base URL.
+- **Local AI** — talks to a model already running on your own device (Ollama on 11434, LocalAI on 8080, LM Studio on 1234 or 5000). No key, nothing leaves the phone.
 
-Whatever fails, the built-in engine takes over, so the button never leaves you with nothing.
+Whatever fails, the built-in engine takes over and the exact error is shown under the button, so the app never leaves you with nothing.
 
 ## How the built-in engine works
 
@@ -55,11 +56,15 @@ The web app is the whole product; the Android app is a thin WebView shell around
 open Lyrics_Studio.html
 ```
 
-The Android side — Java source, manifest, resources, and a `build.sh` that compiles the APK by hand with aapt2, javac, d8, zipalign and apksigner (no Gradle) — is inside `lyrics-studio-repo.zip` in this repository. Unzip it and run:
+The Android source lives in `android/` — Java, manifest, resources, and a `build.sh` that compiles the APK by hand with aapt2, javac, d8, zipalign and apksigner. No Gradle needed:
 
 ```bash
-cd android && ANDROID_SDK=/path/to/sdk ./build.sh
+cd android
+cp ../Lyrics_Studio.html assets/index.html
+ANDROID_SDK=/path/to/sdk ./build.sh
 ```
+
+It writes a signed APK to `apk/LyricsStudio.apk`.
 
 ## Privacy
 
