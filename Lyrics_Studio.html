@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lyrics Studio</title>
+<style>
+:root{--ink:#14161f;--mute:rgba(20,22,31,.58);--glass:rgba(255,255,255,.42);--glass2:rgba(255,255,255,.62);--edge:rgba(255,255,255,.75);--shadow:rgba(40,40,90,.16);--acc:#ff5a3c;--acc2:#ff2d7a;--bg1:#dfe9ff;--bg2:#ffe3ef;--b1:#7aa7ff;--b2:#ff8fb8;--b3:#ffc27a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#f5f6fb;--mute:rgba(245,246,251,.6);--glass:rgba(40,42,60,.42);--glass2:rgba(70,72,100,.5);--edge:rgba(255,255,255,.22);--shadow:rgba(0,0,0,.45);--bg1:#0b0d1a;--bg2:#1a0c22;--b1:#3b57d6;--b2:#b02a73;--b3:#c2662a}}
+:root[data-theme="dark"]{--ink:#f5f6fb;--mute:rgba(245,246,251,.6);--glass:rgba(40,42,60,.42);--glass2:rgba(70,72,100,.5);--edge:rgba(255,255,255,.22);--shadow:rgba(0,0,0,.45);--bg1:#0b0d1a;--bg2:#1a0c22;--b1:#3b57d6;--b2:#b02a73;--b3:#c2662a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{min-height:100vh;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2));font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.75;z-index:0;animation:float 18s ease-in-out infinite alternate}
+.blob.a{width:320px;height:320px;background:var(--b1);top:-60px;left:-80px}
+.blob.b{width:300px;height:300px;background:var(--b2);top:35%;right:-100px;animation-delay:-6s}
+.blob.c{width:280px;height:280px;background:var(--b3);bottom:-80px;left:10%;animation-delay:-11s}
+@keyframes float{to{transform:translate(50px,-40px) scale(1.15)}}
+main{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:22px 16px 48px}
+.glass{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);border:1px solid var(--edge);border-radius:28px;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.12),0 12px 36px var(--shadow)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,0) 38%,rgba(255,255,255,0) 70%,rgba(255,255,255,.18));mix-blend-mode:soft-light}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 8px 20px rgba(255,45,122,.4)}
+h1{font-size:30px;line-height:1.1;margin:0;letter-spacing:-.8px;font-weight:800}
+.sub{margin:2px 0 0;color:var(--mute);font-size:14px}
+.card{padding:18px;margin-bottom:16px}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mute);margin:16px 2px 8px}
+.lbl:first-child{margin-top:0}
+textarea{width:100%;min-height:82px;resize:none;font:inherit;font-size:17px;color:var(--ink);background:var(--glass);border:1px solid var(--edge);border-radius:18px;padding:13px 14px;outline:none;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+textarea::placeholder{color:var(--mute)}
+textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(255,90,60,.2)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -4px;scrollbar-width:none;scroll-snap-type:x proximity}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;scroll-snap-align:start;font:inherit;font-size:15px;font-weight:600;color:var(--ink);background:var(--glass);border:1px solid var(--edge);border-radius:999px;padding:9px 16px;cursor:pointer;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45);transition:transform .15s,background .2s}
+.chip:active{transform:scale(.94)}
+.chip.on{color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:rgba(255,255,255,.5);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),0 6px 16px rgba(255,45,122,.35)}
+.seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--glass);border:1px solid var(--edge)}
+.seg button{flex:1;font:inherit;font-size:14px;font-weight:600;color:var(--mute);background:none;border:0;border-radius:999px;padding:9px 6px;cursor:pointer;transition:all .2s}
+.seg button.on{color:var(--ink);background:var(--glass2);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 3px 10px var(--shadow)}
+.go{width:100%;margin-top:20px;font:inherit;font-size:18px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:22px;padding:16px;cursor:pointer;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 12px 28px rgba(255,45,122,.42);transition:transform .15s}
+.go:active{transform:scale(.98)}
+.go:disabled{opacity:.6}
+.err{margin-top:12px;font-size:14px;color:#ff4d5e;font-weight:600}
+.res{padding:20px;animation:rise .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.97)}}
+@keyframes fade{from{opacity:0}}
+.out{font-size:18px;line-height:1.8;word-break:break-word}
+.out .t{font-size:24px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;line-height:1.3}
+.out .s{font-size:11.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc);margin-top:16px}
+.out .l{min-height:.6em}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tools .chip{padding:10px 16px}
+.hist{display:flex;flex-direction:column;gap:8px}
+.hi{display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--glass);border:1px solid var(--edge);border-radius:16px;padding:12px 14px;cursor:pointer}
+.hi small{color:var(--mute);flex:none}
+.hi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.foot{text-align:center;color:var(--mute);font-size:12.5px;margin-top:8px}
+.gear{margin-left:auto;width:46px;height:46px;flex:none;border-radius:16px;display:grid;place-items:center;font-size:19px;line-height:1;color:var(--ink);background:var(--glass);border:1px solid var(--edge);cursor:pointer;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+.gear:active{transform:scale(.94)}
+.sheet[hidden]{display:none!important}
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:14px;background:rgba(8,10,20,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fade .2s}
+.panel{width:100%;max-width:560px;max-height:86vh;overflow:auto;padding:18px;animation:rise .32s cubic-bezier(.2,.9,.3,1)}
+.panel input{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--glass);border:1px solid var(--edge);border-radius:16px;padding:12px 14px;outline:none}
+.panel input::placeholder{color:var(--mute)}
+.panel input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(255,90,60,.2)}
+.note{font-size:12.5px;color:var(--mute);margin:10px 2px 0;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(18px);z-index:30;opacity:0;pointer-events:none;padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#fff;background:rgba(18,20,30,.92);box-shadow:0 10px 26px rgba(0,0,0,.3);transition:opacity .25s,transform .25s;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){.blob,.res,.panel{animation:none}}
+</style>
+</head>
+<body>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<main>
+  <header>
+    <div class="logo">🎵</div>
+    <div><h1>Lyrics Studio</h1><p class="sub">Original lyrics in 28 languages</p></div>
+    <button class="gear" id="gear" aria-label="Settings">⚙</button>
+  </header>
+
+  <section class="glass card">
+    <div class="lbl">Your idea</div>
+    <textarea id="topic" placeholder="बारिश में पहला प्यार… or any idea"></textarea>
+    <div class="lbl">Language</div><div class="chips" id="lang"></div>
+    <div class="lbl">Genre</div><div class="chips" id="genre"></div>
+    <div class="lbl">Mood</div><div class="chips" id="mood"></div>
+    <div class="lbl">Length</div><div class="seg" id="len"></div>
+    <div class="lbl">Script</div><div class="seg" id="script"></div>
+    <button class="go" id="go">✨ Generate lyrics</button>
+    <div class="err" id="err" hidden></div>
+  </section>
+
+  <section class="glass res" id="res" hidden>
+    <div class="out" id="out"></div>
+    <div class="tools">
+      <button class="chip" id="copy">Copy</button>
+      <button class="chip" id="again">Regenerate</button>
+      <button class="chip" id="save">Save .txt</button>
+      <button class="chip" id="share">Share</button>
+    </div>
+  </section>
+
+  <section class="glass card" id="histCard" hidden>
+    <div class="lbl">Recent</div><div class="hist" id="hist"></div>
+  </section>
+  <p class="foot">AI-written originals. Please don’t pass them off as another artist’s work.</p>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="glass panel">
+    <div class="lbl" style="margin-top:0">Lyrics source</div>
+    <div class="seg" id="srcSeg">
+      <button data-src="local" class="on">Built-in engine</button>
+      <button data-src="ai">AI model</button>
+    </div>
+    <div id="aiBox" hidden>
+      <div class="lbl">Provider</div>
+      <div class="seg" id="provSeg">
+        <button data-p="gemini" class="on">Gemini</button>
+        <button data-p="openai">OpenAI</button>
+        <button data-p="local">Local AI</button>
+      </div>
+      <div class="lbl" id="keyLbl">API key</div>
+      <input type="password" id="keyIn" placeholder="Paste your key" autocomplete="off">
+      <div class="lbl">Model</div>
+      <input type="text" id="modelIn" placeholder="gemini-2.0-flash" autocomplete="off">
+      <div class="lbl" id="baseLbl" hidden>Base URL</div>
+      <input type="text" id="baseIn" placeholder="https://api.openai.com/v1" autocomplete="off" hidden>
+      <p class="note">The built-in engine works offline with no key. <b>Local AI</b> talks to a model already running on this device (Ollama, LocalAI or LM Studio on 127.0.0.1) &mdash; nothing leaves the phone and nothing is downloaded here. Gemini and OpenAI send the prompt to that provider with your own key.</p>
+    </div>
+    <div class="tools">
+      <button class="chip" id="closeSheet">Done</button>
+      <button class="chip" id="clearAI">Clear key</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>var DATA = {"Hindi":{"script":"deva","titles":["{t}","{t} की धुन","तेरे बिना","आधी रात का गाना","फिर से तेरी गली","दिल की आवाज़"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["तेरी यादों की बारिश में भीगता है दिल","हर कतरा तेरा नाम लिखता है"]},{"i":1,"fn":"o","moods":["nos"],"lines":["पुरानी गली, वही चाय की दुकान","तेरा हँसना अब भी गूँजता है यहाँ"]},{"i":2,"fn":"o","moods":["mel"],"lines":["खाली कमरे में जलता है एक दीया","साया तेरा फिर भी पास नहीं"]},{"i":3,"fn":"o","moods":["joy","ene"],"lines":["आज सूरज ने जैसे नया रंग चुना","हवा भी गाती है तेरे लिए"]},{"i":4,"fn":"o","moods":["mot"],"lines":["रास्ता कठिन है, पर कदम नहीं रुके","मंज़िल देख ली है, अब डर कहाँ"]},{"i":5,"fn":"o","moods":["spi","pea"],"lines":["मंदिर की घंटी, नदी का वही शोर","तेरे नाम से शुरू होता है मेरा मन"]},{"i":6,"fn":"v","moods":["rom"],"lines":["तेरे बिना आधी है हर मुस्कान","पूरी रात जागे ये अरमान"]},{"i":7,"fn":"v","moods":["rom"],"lines":["बातें तेरी, झूठे वादे तेरे","फिर भी दिल ने तुझको चुना"]},{"i":8,"fn":"v","moods":["rom","nos"],"lines":["ये {t} की बातें, ये {t} के दिन","सब कुछ तेरे बिना अधूरा लगे"]},{"i":9,"fn":"v","moods":["hea"],"lines":["तू चला गया तो सब कुछ छूट गया","ये दिल अब भी तेरा ही रहा"]},{"i":10,"fn":"v","moods":["hea","mel"],"lines":["मैंने तोड़ दिए सारे आईने","क्योंकि उनमें तेरा चेहरा दिखता था"]},{"i":11,"fn":"v","moods":["nos"],"lines":["वो स्कूल की छत, वो बरसात का दिन","हम दोनों भूल गए थे घर जाना"]},{"i":12,"fn":"v","moods":["joy","ene"],"lines":["दोस्तों की महफ़िल, ढोल की थाप","आज दिल ने कहा — बस नाचते रहो"]},{"i":13,"fn":"v","moods":["mot"],"lines":["गिरे तो क्या, उठना भी तो है","आसमान से आगे उड़ना भी तो है"]},{"i":14,"fn":"v","moods":["pea"],"lines":["धीमी हवा, बंद आँखें, खुला आसमान","कोई जल्दी नहीं, बस यही समय"]},{"i":15,"fn":"v","moods":["ene"],"lines":["दिल की धड़कन तेज़ हो गई","रंगों में आग, आवाज़ में तूफ़ान"]},{"i":16,"fn":"v","moods":["mel"],"lines":["टूटे तारे की तरह जलता है मन","रोशनी छोड़ के जाना है मुझे"]},{"i":17,"fn":"v","moods":["fun"],"lines":["मेरी गाड़ी पुरानी, गाना भी बेसुरा","पर मज़ा तो आता है यारों के संग"]},{"i":18,"fn":"v","moods":["spi"],"lines":["जो तूने दिया, वो सब लौटा दिया","अब खाली हाथ भी भरा हुआ है"]},{"i":19,"fn":"c","moods":["rom"],"lines":["तेरे नाम की धुन है मेरे होंठों पे","गाता हूँ जहाँ भी जाऊँ मैं"]},{"i":20,"fn":"c","moods":["rom","ene"],"lines":["आ जा, आ जा, ये रात बुलाती है","तेरे बिना ये दिल घबराता है"]},{"i":21,"fn":"c","moods":["hea","mel"],"lines":["तू जा चुका, पर गाना रह गया","दिल के कोने में तेरा ठिकाना रह गया"]},{"i":22,"fn":"c","moods":["joy","fun"],"lines":["आज नाचेंगे, आज गाएँगे","सारे ग़म को भूल के आएँगे"]},{"i":23,"fn":"c","moods":["mot"],"lines":["मैं रुकूँगा नहीं, मैं झुकूँगा नहीं","जो मेरा है, वो खुद मिलेगा यहीं"]},{"i":24,"fn":"c","moods":["pea","spi"],"lines":["धीरे-धीरे बहता है दिल का दरिया","कोई मंज़िल नहीं, बस सफ़र ही सफ़र"]},{"i":25,"fn":"c","moods":["spi"],"lines":["तेरे दर पे सर है, और कुछ नहीं","जो तू दे दे, वही मेरा सब कुछ"]},{"i":26,"fn":"c","moods":["nos"],"lines":["वो दिन, वो बातें, वो तेरी हँसी","आज भी जागती है मेरी ख़ामोशी"]},{"i":27,"fn":"b","moods":["rom"],"lines":["अगर ये रात कभी ख़त्म ना हो","तो तेरा हाथ थामे बैठा रहूँ"]},{"i":28,"fn":"b","moods":["hea","mel"],"lines":["मैं ठीक हूँ, ये मत पूछो बार-बार","आँखें कुछ और कह जाती हैं"]},{"i":29,"fn":"b","moods":["mot","ene"],"lines":["हर गिरावट के बाद एक उड़ान है","हर अंधेरे के पीछे एक सुबह"]},{"i":30,"fn":"b","moods":["joy","fun"],"lines":["बजे ढोल, बजे ढोल, मन भी बोले","आज की रात किसी की नहीं, सबकी है"]},{"i":31,"fn":"b","moods":["spi","pea"],"lines":["मौन में भी तेरा ही शब्द बोलता है","आँख बंद करूँ तो तू दिखता है"]}]},"English":{"script":"latin","titles":["{t}","{t}","Without You","One More Night","Half a Song","Somewhere in the Static"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Rain on the window, your name in the glass","Every drop's a word I can't take back"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Same old street, same corner store","Your laugh still lives in the doorframe"]},{"i":2,"fn":"o","moods":["mel"],"lines":["One lamp burning in an empty room","The dark keeps your side of the bed"]},{"i":3,"fn":"o","moods":["joy","ene"],"lines":["Sun came up wearing a colour I'd never seen","The whole street's singing out of key"]},{"i":4,"fn":"o","moods":["mot"],"lines":["Road's still steep but my feet don't quit","I've seen the summit, so what's a little wind"]},{"i":5,"fn":"o","moods":["fun"],"lines":["My car's a wreck and my voice is worse","But the chorus sounds better with you in it"]},{"i":6,"fn":"v","moods":["rom"],"lines":["Half a smile is all I've got without you","The other half is waiting by the phone"]},{"i":7,"fn":"v","moods":["rom"],"lines":["You said forever, then you said goodbye","I still keep your coat hanging by the door"]},{"i":8,"fn":"v","moods":["rom","nos"],"lines":["This {t} in my head, this {t} on repeat","Everything's a little out of tune"]},{"i":9,"fn":"v","moods":["hea"],"lines":["You left and the whole room stopped","I'm still standing where you dropped my name"]},{"i":10,"fn":"v","moods":["hea","mel"],"lines":["I broke every mirror in the house","'Cause they kept on showing me your face"]},{"i":11,"fn":"v","moods":["nos"],"lines":["That rooftop, that August rain","We forgot the way back home"]},{"i":12,"fn":"v","moods":["joy","ene"],"lines":["Friends in the kitchen, drums on the wall","Nobody's leaving till the speakers die"]},{"i":13,"fn":"v","moods":["mot"],"lines":["Falling's just a different way to fly","I've been down before, I know the climb"]},{"i":14,"fn":"v","moods":["pea","spi"],"lines":["Slow wind, shut eyes, wide open sky","Nothing's late and nothing's mine"]},{"i":15,"fn":"v","moods":["ene"],"lines":["Heartbeat's got a new tempo now","Colours loud and the bass won't quit"]},{"i":16,"fn":"v","moods":["mel"],"lines":["I burn like a star that's out of time","Beautiful for a minute, then gone"]},{"i":17,"fn":"v","moods":["fun"],"lines":["I'm three chords and a bad haircut","And somehow you still sing along"]},{"i":18,"fn":"c","moods":["rom"],"lines":["Your name's a melody stuck on my lips","I sing it everywhere I go"]},{"i":19,"fn":"c","moods":["rom","ene"],"lines":["Come on, come on, the night keeps calling","Without you my heart's a little too loud"]},{"i":20,"fn":"c","moods":["hea","mel"],"lines":["You're gone but the song stayed","There's still a you-shaped room in me"]},{"i":21,"fn":"c","moods":["joy","fun"],"lines":["Tonight we dance, tonight we sing","Leave the sorrow at the door"]},{"i":22,"fn":"c","moods":["mot"],"lines":["I won't stop and I won't bend","What's mine is mine, I'll meet it here"]},{"i":23,"fn":"c","moods":["pea","spi"],"lines":["Slow river running through my chest","No destination, just the sound"]},{"i":24,"fn":"c","moods":["nos"],"lines":["Those days, those words, that laugh of yours","Still keeping my silence awake"]},{"i":25,"fn":"b","moods":["rom"],"lines":["If this night never has to end","I'd hold your hand and let it run"]},{"i":26,"fn":"b","moods":["hea"],"lines":["I'm fine, don't ask me twice","My eyes keep telling on me"]},{"i":27,"fn":"b","moods":["mot","ene"],"lines":["Every fall's a runway in disguise","Every dark's a morning in the dark"]},{"i":28,"fn":"b","moods":["joy","fun"],"lines":["Turn it up, the whole room knows","Tonight belongs to no one, so it's ours"]}]},"Hinglish":{"script":"latin","titles":["{t}","{t}","Tere Bina","Ek Aur Raat","Aadha Gaana"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Baarish ki boondein, tera naam glass pe","Har boond ek line jo main likh na saka"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Wahi purani gali, wahi chai ki tapri","Teri hansi abhi bhi goonjti hai"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Khaali kamre mein ek diya jalta hai","Tera shadow hai, par tu nahi"]},{"i":3,"fn":"o","moods":["joy","ene"],"lines":["Aaj suraj ne naya colour pehna","Poori sadak besura ga rahi hai"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Tere bina aadhi hai har smile","Poori raat jaagta hai ye dil"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["Ye {t} wali baatein, ye {t} wale din","Tere bina sab kuch off-beat lagta hai"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Tu chala gaya, sab kuch ruk gaya","Main abhi bhi wahin khada hoon"]},{"i":7,"fn":"v","moods":["nos"],"lines":["Wo school ki chhat, wo August ki rain","Hum dono ghar jaana bhool gaye the"]},{"i":8,"fn":"v","moods":["joy","ene"],"lines":["Dost, chai, aur ek purana speaker","Aaj koi ghar nahi jaane wala"]},{"i":9,"fn":"v","moods":["mot"],"lines":["Girna bhi ek style hai udne ka","Main pehle bhi gira tha, uth ke aaya"]},{"i":10,"fn":"v","moods":["pea"],"lines":["Dheemi hawa, band aankhein, khula aasman","Koi jaldi nahi, bas yahi time hai"]},{"i":11,"fn":"c","moods":["rom"],"lines":["Tere naam ki dhun mere honthon pe","Jahan bhi jaata hoon, wahi gaata hoon"]},{"i":12,"fn":"c","moods":["rom","ene"],"lines":["Aa ja, aa ja, ye raat bula rahi hai","Tere bina ye dil ghabra raha hai"]},{"i":13,"fn":"c","moods":["hea","mel"],"lines":["Tu ja chuka, par gaana reh gaya","Dil ke corner mein tera thikana reh gaya"]},{"i":14,"fn":"c","moods":["joy","fun"],"lines":["Aaj naachenge, aaj gaayenge","Saare gham bhoola ke aayenge"]},{"i":15,"fn":"c","moods":["mot"],"lines":["Main rukunga nahi, main jhukunga nahi","Jo mera hai wo khud milega yahin"]},{"i":16,"fn":"b","moods":["rom"],"lines":["Agar ye raat kabhi khatam na ho","Tera haath thaame baitha rahoon"]},{"i":17,"fn":"b","moods":["hea"],"lines":["Main theek hoon, baar baar mat poocho","Aankhein kuch aur keh jaati hain"]},{"i":18,"fn":"b","moods":["mot","ene"],"lines":["Har girne ke baad ek udaan hai","Har andhere ke peeche ek subah"]}]},"Punjabi":{"script":"guru","titles":["{t}","{t} ਦੀ ਧੁਨ","ਤੇਰੇ ਬਿਨਾਂ","ਪੁਰਾਣੀ ਗਲੀ","ਫਿਰ ਮਿਲਾਂਗੇ","ਦਿਲ ਦਾ ਗੀਤ"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["ਤੇਰੀ ਯਾਦ ਦੀ ਬਾਰਿਸ਼ ਵਿੱਚ ਭਿੱਜਦਾ ਦਿਲ","ਹਰ ਬੂੰਦ ਤੇਰਾ ਨਾਮ ਲਿਖਦੀ"]},{"i":1,"fn":"o","moods":["nos"],"lines":["ਪੁਰਾਣੀ ਗਲੀ, ਉਹੀ ਚਾਹ ਦੀ ਥੜ੍ਹੀ","ਤੇਰੀ ਹੱਸੀ ਅਜੇ ਵੀ ਗੂੰਜਦੀ"]},{"i":2,"fn":"o","moods":["mel"],"lines":["ਖਾਲੀ ਕਮਰੇ ਵਿੱਚ ਬਲਦਾ ਇੱਕ ਦੀਵਾ","ਤੇਰਾ ਸਾਇਆ ਫਿਰ ਵੀ ਕੋਲ ਨਹੀਂ"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["ਅੱਜ ਸੂਰਜ ਨੇ ਨਵਾਂ ਰੰਗ ਚੁਣਿਆ","ਹਵਾ ਵੀ ਤੇਰੇ ਲਈ ਗਾਉਂਦੀ"]},{"i":4,"fn":"v","moods":["rom"],"lines":["ਤੇਰੇ ਬਿਨਾਂ ਅੱਧੀ ਹੈ ਹਰ ਹੱਸੀ","ਸਾਰੀ ਰਾਤ ਜਾਗਦਾ ਇਹ ਅਰਮਾਨ"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["ਇਹ {t} ਦੀਆਂ ਗੱਲਾਂ, ਇਹ {t} ਦੇ ਦਿਨ","ਤੇਰੇ ਬਿਨਾਂ ਸਭ ਅਧੂਰਾ ਲੱਗਦਾ"]},{"i":6,"fn":"v","moods":["hea"],"lines":["ਤੂੰ ਚਲਾ ਗਿਆ ਤਾਂ ਸਭ ਛੁੱਟ ਗਿਆ","ਇਹ ਦਿਲ ਅਜੇ ਵੀ ਤੇਰਾ ਰਿਹਾ"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["ਮੈਂ ਸਾਰੇ ਸ਼ੀਸ਼ੇ ਤੋੜ ਦਿੱਤੇ","ਕਿਉਂਕਿ ਉਨ੍ਹਾਂ ਵਿੱਚ ਤੇਰਾ ਚਿਹਰਾ ਦਿਸਦਾ"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ਉਹ ਸਕੂਲ ਦੀ ਛੱਤ, ਉਹ ਬਰਸਾਤ ਦਾ ਦਿਨ","ਅਸੀਂ ਘਰ ਜਾਣਾ ਭੁੱਲ ਗਏ ਸੀ"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["ਦੋਸਤਾਂ ਦੀ ਮਹਿਫ਼ਲ, ਢੋਲ ਦੀ ਥਾਪ","ਅੱਜ ਦਿਲ ਨੇ ਕਿਹਾ — ਬੱਸ ਨੱਚਦੇ ਰਹੋ"]},{"i":10,"fn":"v","moods":["mot"],"lines":["ਡਿੱਗੇ ਤਾਂ ਕੀ, ਉੱਠਣਾ ਵੀ ਤਾਂ ਹੈ","ਅਸਮਾਨ ਤੋਂ ਅੱਗੇ ਉੱਡਣਾ ਵੀ ਤਾਂ ਹੈ"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ਹੌਲੀ ਹਵਾ, ਬੰਦ ਅੱਖਾਂ, ਖੁੱਲ੍ਹਾ ਅਸਮਾਨ","ਕੋਈ ਕਾਹਲੀ ਨਹੀਂ, ਬੱਸ ਇਹੀ ਸਮਾਂ"]},{"i":12,"fn":"c","moods":["rom"],"lines":["ਤੇਰੇ ਨਾਮ ਦੀ ਧੁਨ ਹੈ ਬੁੱਲ੍ਹਾਂ ਤੇ","ਗਾਉਂਦਾ ਹਾਂ ਜਿੱਥੇ ਵੀ ਜਾਵਾਂ"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["ਆ ਜਾ, ਆ ਜਾ, ਇਹ ਰਾਤ ਬੁਲਾਉਂਦੀ","ਤੇਰੇ ਬਿਨਾਂ ਇਹ ਦਿਲ ਘਬਰਾਉਂਦਾ"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["ਤੂੰ ਜਾ ਚੁੱਕਾ, ਪਰ ਗੀਤ ਰਹਿ ਗਿਆ","ਦਿਲ ਦੇ ਕੋਨੇ ਵਿੱਚ ਤੇਰਾ ਟਿਕਾਣਾ ਰਹਿ ਗਿਆ"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["ਅੱਜ ਨੱਚਾਂਗੇ, ਅੱਜ ਗਾਵਾਂਗੇ","ਸਾਰੇ ਗ਼ਮ ਭੁੱਲ ਕੇ ਆਵਾਂਗੇ"]},{"i":16,"fn":"c","moods":["mot"],"lines":["ਮੈਂ ਰੁਕਾਂਗਾ ਨਹੀਂ, ਮੈਂ ਝੁਕਾਂਗਾ ਨਹੀਂ","ਜੋ ਮੇਰਾ ਹੈ, ਉਹ ਖੁਦ ਮਿਲੇਗਾ ਇੱਥੇ"]},{"i":17,"fn":"b","moods":["rom"],"lines":["ਜੇ ਇਹ ਰਾਤ ਕਦੇ ਖ਼ਤਮ ਨਾ ਹੋਵੇ","ਤੇਰਾ ਹੱਥ ਫੜ ਕੇ ਬੈਠਾ ਰਹਾਂ"]},{"i":18,"fn":"b","moods":["hea"],"lines":["ਮੈਂ ਠੀਕ ਹਾਂ, ਨਾ ਪੁੱਛ ਵਾਰ-ਵਾਰ","ਅੱਖਾਂ ਕੁਝ ਹੋਰ ਕਹਿ ਜਾਂਦੀਆਂ"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ਹਰ ਡਿੱਗਣ ਤੋਂ ਬਾਅਦ ਇੱਕ ਉਡਾਣ ਹੈ","ਹਰ ਹਨੇਰੇ ਪਿੱਛੇ ਇੱਕ ਸਵੇਰ"]}]},"Urdu":{"script":"arab","titles":["{t}","{t} کی دھن||{t} ki dhun","تیرے بغیر||tere baghair","پرانے کوچے میں||puraane kuche mein","پھر ملیں گے||phir milenge","دل کا نغمہ||dil ka naghma"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["تیری یادوں کی بارش میں بھیگتا ہے دل||teri yaadon ki baarish mein bheegta hai dil","ہر قطرہ تیرا نام لکھتا ہے||har qatra tera naam likhta hai"]},{"i":1,"fn":"o","moods":["nos"],"lines":["پرانے کوچے کی وہی چائے کی دکان||puraane kuche ki wahi chai ki dukaan","تیری ہنسی اب بھی گونجتی ہے یہاں||teri hansi ab bhi goonjti hai yahan"]},{"i":2,"fn":"o","moods":["mel"],"lines":["خالی کمرے میں جلتا ہے اک دیا||khaali kamre mein jalta hai ik diya","تیرا سایہ پھر بھی پاس نہیں||tera saaya phir bhi paas nahi"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["آج سورج نے نیا رنگ چنا ہے||aaj sooraj ne naya rang chuna hai","ہوا بھی تیرے لیے گاتی ہے||hawa bhi tere liye gaati hai"]},{"i":4,"fn":"v","moods":["rom"],"lines":["تیرے بغیر ادھوری ہے ہر مسکان||tere baghair adhoori hai har muskaan","ساری رات جاگتا ہے یہ ارمان||saari raat jaagta hai ye armaan"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["یہ {t} کی باتیں، یہ {t} کے دن||ye {t} ki baatein, ye {t} ke din","تیرے بغیر سب کچھ ادھورا لگے||tere baghair sab kuch adhoora lage"]},{"i":6,"fn":"v","moods":["hea"],"lines":["تو چلا گیا تو سب کچھ چھوٹ گیا||tu chala gaya to sab kuch chhoot gaya","یہ دل اب بھی تیرا ہی رہا||ye dil ab bhi tera hi raha"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["میں نے توڑ دیے سارے آئینے||main ne tod diye saare aaine","کیونکہ ان میں تیرا چہرہ دکھتا تھا||kyunke un mein tera chehra dikhta tha"]},{"i":8,"fn":"v","moods":["nos"],"lines":["وہ اسکول کی چھت، وہ برسات کا دن||wo school ki chhat, wo barsaat ka din","ہم دونوں گھر جانا بھول گئے تھے||hum dono ghar jaana bhool gaye the"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["دوستوں کی محفل، ڈھول کی تھاپ||doston ki mehfil, dhol ki thaap","آج دل نے کہا — بس ناچتے رہو||aaj dil ne kaha — bas naachte raho"]},{"i":10,"fn":"v","moods":["mot"],"lines":["گرے تو کیا، اٹھنا بھی تو ہے||gire to kya, uthna bhi to hai","آسمان سے آگے اڑنا بھی تو ہے||aasmaan se aage udna bhi to hai"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["دھیمی ہوا، بند آنکھیں، کھلا آسمان||dheemi hawa, band aankhein, khula aasmaan","کوئی جلدی نہیں، بس یہی لمحہ||koi jaldi nahi, bas yahi lamha"]},{"i":12,"fn":"c","moods":["rom"],"lines":["تیرے نام کی دھن میرے ہونٹوں پر||tere naam ki dhun mere honton par","جاتا ہوں جہاں بھی، وہی گاتا ہوں||jaata hoon jahan bhi, wahi gaata hoon"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["آ جا، آ جا، یہ رات بلاتی ہے||aa ja, aa ja, ye raat bulaati hai","تیرے بغیر یہ دل گھبراتا ہے||tere baghair ye dil ghabraata hai"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["تو جا چکا، مگر گانا رہ گیا||tu ja chuka, magar gaana reh gaya","دل کے کونے میں تیرا ٹھکانہ رہ گیا||dil ke kone mein tera thikana reh gaya"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["آج ناچیں گے، آج گائیں گے||aaj naachenge, aaj gaayenge","سارے غم بھلا کے آئیں گے||saare gham bhula ke aayenge"]},{"i":16,"fn":"c","moods":["mot"],"lines":["میں رکوں گا نہیں، میں جھکوں گا نہیں||main rukunga nahi, main jhukunga nahi","جو میرا ہے وہ خود ملے گا یہیں||jo mera hai wo khud milega yahin"]},{"i":17,"fn":"b","moods":["rom"],"lines":["اگر یہ رات کبھی ختم نہ ہو||agar ye raat kabhi khatam na ho","تیرا ہاتھ تھامے بیٹھا رہوں||tera haath thaame baitha rahoon"]},{"i":18,"fn":"b","moods":["hea"],"lines":["میں ٹھیک ہوں، بار بار مت پوچھو||main theek hoon, baar baar mat poocho","آنکھیں کچھ اور کہہ جاتی ہیں||aankhein kuch aur keh jaati hain"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ہر گراوٹ کے بعد اک اڑان ہے||har giraawat ke baad ik udaan hai","ہر اندھیرے کے پیچھے اک صبح||har andhere ke peeche ik subah"]}]},"Bengali":{"script":"beng","titles":["{t}","{t} এর সুর","তোমার ছাড়া","পুরনো গলি","আবার দেখা হবে","মনের গান"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["তোমার স্মৃতির বৃষ্টিতে ভিজছে মন","প্রতিটি ফোঁটা তোমার নাম লেখে"]},{"i":1,"fn":"o","moods":["nos"],"lines":["পুরনো গলি, সেই চায়ের দোকান","তোমার হাসি আজও প্রতিধ্বনি করে"]},{"i":2,"fn":"o","moods":["mel"],"lines":["খালি ঘরে জ্বলে একটা প্রদীপ","তোমার ছায়া তবু কাছেই নেই"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["আজ ভোর নতুন রং বেছে নিল","হাওয়াও তোমার জন্য গায়"]},{"i":4,"fn":"v","moods":["rom"],"lines":["তোমার ছাড়া অর্ধেক প্রতিটি হাসি","সারারাত জেগে থাকে এই মন"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["এই {t} এর কথা, এই {t} এর দিন","তোমার ছাড়া সবই অসম্পূর্ণ লাগে"]},{"i":6,"fn":"v","moods":["hea"],"lines":["তুমি চলে গেলে সব থেমে গেল","তবু এই মন আজও তোমারই"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["আমি সব আয়না ভেঙে দিয়েছি","কারণ তাতে তোমার মুখ দেখা যেত"]},{"i":8,"fn":"v","moods":["nos"],"lines":["সেই স্কুলের ছাদ, সেই বর্ষার দিন","আমরা বাড়ি ফেরা ভুলেই গেছিলাম"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["বন্ধুদের আড্ডা, ঢোলের তালে","আজ মন বলল — শুধু নেচে যাও"]},{"i":10,"fn":"v","moods":["mot"],"lines":["পড়লে কী হয়, উঠতেও তো হবে","আকাশের ওপারে উড়তেও তো হবে"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ধীর হাওয়া, বন্ধ চোখ, খোলা আকাশ","কোনো তাড়া নেই, শুধু এই সময়"]},{"i":12,"fn":"c","moods":["rom"],"lines":["তোমার নামের সুর আমার ঠোঁটে","যেখানেই যাই সেখানেই গাই"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["এসো, এসো, এই রাত ডাকে","তোমার ছাড়া এই মন ভয় পায়"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["তুমি গেছ, কিন্তু গান রয়ে গেছে","মনের কোণে তোমার ঘর রয়ে গেছে"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["আজ নাচব, আজ গাইব","সব দুঃখ ভুলে যাব"]},{"i":16,"fn":"c","moods":["mot"],"lines":["আমি থামব না, আমি নোয়াব না","যা আমার তা এখানেই মিলবে"]},{"i":17,"fn":"b","moods":["rom"],"lines":["এই রাত যদি কখনো না শেষ হয়","তোমার হাত ধরে বসে থাকি"]},{"i":18,"fn":"b","moods":["hea"],"lines":["আমি ভালো আছি, বারবার থেকো না জিজ্ঞেস","চোখ কিছু অন্য কথা বলে"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["প্রতিটি পতনের পরে একটা ওড়া আছে","প্রতিটি অন্ধকারের পিছনে ভোর"]}]},"Marathi":{"script":"deva","titles":["{t}","{t} — एक गाणं","तुझ्याशिवाय","पावसाची रात","पुन्हा एकदा","मनातलं गाणं"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["तुझ्या आठवणींचा पाऊस बरसतोय","प्रत्येक थेंबात तुझं नाव आहे"]},{"i":1,"fn":"o","moods":["nos"],"lines":["जुनी गल्ली, तीच हॉटेलची खुर्ची","तुझं हसू अजूनही ऐकू येतं"]},{"i":2,"fn":"o","moods":["mel"],"lines":["रिकाम्या खोलीत एकटीच कंदील","तुझी सावली तरीही दूर आहे"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["आज सकाळनं नवा रंग निवडला","वाऱ्यालाही गायचंय तुझ्यासाठी"]},{"i":4,"fn":"v","moods":["rom"],"lines":["तुझ्याशिवाय प्रत्येक गाणं अर्धं आहे","रात्रभर जागं राहतं मन"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["हे {t} चे बोल, हे {t} चे दिवस","तुझ्याशिवाय सगळं अपुरं वाटतं"]},{"i":6,"fn":"v","moods":["hea"],"lines":["तू गेल्यावर सगळं थांबलं","तरी हे मन अजूनही तुझंच आहे"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["मी सगळे आरसे फोडले","कारण त्यात तुझा चेहरा दिसत होता"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ती शाळेची गच्ची, तो पावसाचा दिवस","आपण घरी जायचंच विसरलो होतो"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["मित्रांची मैफल, ढोलाचा आवाज","आज मन म्हणालं — नाचतच राहा"]},{"i":10,"fn":"v","moods":["mot"],"lines":["पडलो तर काय, उठायचंही आहे","आकाशाच्या पलीकडे उडायचं आहे"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["हळूच वारा, बंद डोळे, मोकळं आकाश","कुठलीही घाई नाही, फक्त हाच क्षण"]},{"i":12,"fn":"c","moods":["rom"],"lines":["तुझ्या नावाची चाल ओठांवर आहे","जिथे जाईन तिथे गाईन मी"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["ये ना, ये ना, ही रात बोलावते","तुझ्याशिवाय हे मन घाबरतं"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["तू गेलीस, पण गाणं राहिलं","मनाच्या कोपऱ्यात तुझं घर राहिलं"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["आज नाचू, आज गाऊ","सगळं दुःख विसरून जाऊ"]},{"i":16,"fn":"c","moods":["mot"],"lines":["मी थांबणार नाही, वाकणार नाही","जे माझं आहे ते इथेच भेटेल"]},{"i":17,"fn":"b","moods":["rom"],"lines":["ही रात कधी संपली नाही तर","तुझा हात धरून बसून राहीन"]},{"i":18,"fn":"b","moods":["hea"],"lines":["मी ठीक आहे, विचारू नको वारंवार","डोळे काहीतरी वेगळंच सांगतात"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["प्रत्येक पडण्यानंतर एक उड्डाण आहे","प्रत्येक अंधाराच्या मागे एक सकाळ"]}]},"Gujarati":{"script":"gujr","titles":["{t}","{t} ની ધૂન","તારા વિના","જૂની શેરી","ફરી મળીશું","મનનું ગીત"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["તારી યાદોની વરસાદમાં ભીનું છે મન","દરેક બિંદુ તારું નામ લખે"]},{"i":1,"fn":"o","moods":["nos"],"lines":["જૂની શેરી, એ જ ચાની દુકાન","તારું હસવું આજે પણ ગુંજે"]},{"i":2,"fn":"o","moods":["mel"],"lines":["ખાલી રૂમમાં સળગે છે એક દીવો","તારો પડછાયો તોય નજીક નથી"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["આજે સૂરજે નવો રંગ પસંદ કર્યો","હવા પણ તારા માટે ગાય"]},{"i":4,"fn":"v","moods":["rom"],"lines":["તારા વિના અધૂરું છે દરેક હસવું","આખી રાત જાગે છે આ મન"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["આ {t} ની વાતો, આ {t} ના દિવસો","તારા વિના બધું અધૂરું લાગે"]},{"i":6,"fn":"v","moods":["hea"],"lines":["તું ચાલ્યો ગયો તો બધું છૂટી ગયું","તોય આ દિલ આજે પણ તારું"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["મેં બધા આયના તોડી નાખ્યા","કારણ કે એમાં તારો ચહેરો દેખાતો"]},{"i":8,"fn":"v","moods":["nos"],"lines":["એ શાળાની છત, એ વરસાદનો દિવસ","આપણે ઘર જવાનું ભૂલી ગયા હતા"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["મિત્રોની મહેફિલ, ઢોલનો તાલ","આજે દિલે કહ્યું — બસ નાચતા રહો"]},{"i":10,"fn":"v","moods":["mot"],"lines":["પડ્યા તો શું, ઊઠવાનું પણ છે","આકાશથી આગળ ઊડવાનું પણ છે"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ધીમો પવન, બંધ આંખો, ખુલ્લું આકાશ","કોઈ ઉતાવળ નહીં, બસ આ જ ક્ષણ"]},{"i":12,"fn":"c","moods":["rom"],"lines":["તારા નામની ધૂન છે હોઠ પર","જ્યાં જઈશ ત્યાં ગઈશ"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["આવ, આવ, આ રાત બોલાવે","તારા વિના આ દિલ ગભરાય"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["તું ગયો, પણ ગીત રહી ગયું","દિલના ખૂણે તારું ઘર રહી ગયું"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["આજે નાચીશું, આજે ગઈશું","બધા ગમ ભૂલીને આવીશું"]},{"i":16,"fn":"c","moods":["mot"],"lines":["હું અટકીશ નહીં, હું નમીશ નહીં","જે મારું છે એ જાતે મળશે અહીં"]},{"i":17,"fn":"b","moods":["rom"],"lines":["જો આ રાત કદી ખતમ ન થાય","તારો હાથ પકડીને બેસી રહું"]},{"i":18,"fn":"b","moods":["hea"],"lines":["હું ઠીક છું, વારંવાર ન પૂછ","આંખો કંઈક બીજું કહી જાય"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["દરેક પડવા પછી એક ઉડાન છે","દરેક અંધારા પાછળ એક સવાર"]}]},"Tamil":{"script":"tamil","titles":["{t}","{t} இசை","உன் இல்லாமல்","பழைய தெரு","மீண்டும் சந்திப்போம்","மனதின் பாடல்"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["உன் நினைவின் மழையில் நனைகிறது மனம்","ஒவ்வொரு துளியும் உன் பெயர் எழுதுகிறது"]},{"i":1,"fn":"o","moods":["nos"],"lines":["பழைய தெரு, அதே தேநீர் கடை","உன் சிரிப்பு இன்றும் எதிரொலிக்கிறது"]},{"i":2,"fn":"o","moods":["mel"],"lines":["காலி அறையில் எரிகிறது ஒரு விளக்கு","உன் நிழல் இன்னும் அருகில் இல்லை"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["இன்று காலை புதிய நிறம் தேர்ந்தெடுத்தது","காற்றும் உனக்காகப் பாடுகிறது"]},{"i":4,"fn":"v","moods":["rom"],"lines":["உன்னை இல்லாமல் பாதியாகிறது ஒவ்வொரு புன்னகை","இரவு முழுவதும் விழித்திருக்கிறது மனம்"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["இந்த {t} பேச்சுகள், இந்த {t} நாட்கள்","உன்னை இல்லாமல் எல்லாம் முழுமையில்லை"]},{"i":6,"fn":"v","moods":["hea"],"lines":["நீ சென்றபின் எல்லாம் நின்றுவிட்டது","இருந்தும் இந்த மனம் இன்னும் உன்னுடையது"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["நான் எல்லா கண்ணாடிகளையும் உடைத்தேன்","ஏனெனில் அவற்றில் உன் முகம் தெரிந்தது"]},{"i":8,"fn":"v","moods":["nos"],"lines":["அந்தப் பள்ளிக் கூரை, அந்த மழை நாள்","நாம் வீட்டுக்குப் போக மறந்தோம்"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["நண்பர்கள் கூட்டம், தவில் ஓசை","இன்று மனம் சொன்னது — ஆடிக்கொண்டே இரு"]},{"i":10,"fn":"v","moods":["mot"],"lines":["விழுந்தால் என்ன, எழுந்திருக்க வேண்டும்","வானத்திற்கு அப்பால் பறக்க வேண்டும்"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["மெதுவான காற்று, மூடிய கண்கள், திறந்த வானம்","அவசரமில்லை, இந்த நொடி மட்டும்"]},{"i":12,"fn":"c","moods":["rom"],"lines":["உன் பெயரின் இசை என் உதடுகளில்","எங்கு சென்றாலும் அதைப் பாடுகிறேன்"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["வா, வா, இந்த இரவு அழைக்கிறது","உன்னை இல்லாமல் மனம் பயப்படுகிறது"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["நீ போனாய், ஆனால் பாடல் தங்கிவிட்டது","மனத்தின் மூலையில் உன் வீடு தங்கிவிட்டது"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["இன்று ஆடுவோம், இன்று பாடுவோம்","எல்லா துக்கத்தையும் மறந்து வருவோம்"]},{"i":16,"fn":"c","moods":["mot"],"lines":["நான் நிற்கமாட்டேன், நான் வணங்கமாட்டேன்","என்னுடையது என்னுடையதே இங்கே கிடைக்கும்"]},{"i":17,"fn":"b","moods":["rom"],"lines":["இந்த இரவு முடிவதே இல்லை என்றால்","உன் கையைப் பிடித்து அமர்ந்திருப்பேன்"]},{"i":18,"fn":"b","moods":["hea"],"lines":["நான் நலமாக இருக்கிறேன், திரும்பத் திரும்ப கேட்காதே","கண்கள் வேறு ஏதோ சொல்கின்றன"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ஒவ்வொரு வீழ்ச்சிக்குப் பிறகும் ஒரு பறப்பு","ஒவ்வொரு இருளுக்குப் பின்னும் ஒரு காலை"]}]},"Telugu":{"script":"telu","titles":["{t}","{t} రాగం","నీ లేని","పాత వీధి","మళ్ళీ కలుద్దాం","మనసు పాట"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["నీ జ్ఞాపకాల వర్షంలో తడుస్తోంది మనసు","ప్రతి చుక్కా నీ పేరు రాస్తోంది"]},{"i":1,"fn":"o","moods":["nos"],"lines":["పాత వీధి, అదే చాయ్ దుకాణం","నీ నవ్వు ఇప్పటికీ మారుమోగుతోంది"]},{"i":2,"fn":"o","moods":["mel"],"lines":["ఖాళీ గదిలో ఒక దీపం వెలుగుతోంది","నీ నీడ ఇంకా దగ్గర లేదు"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["ఈ రోజు ఉదయం కొత్త రంగు ఎంచుకుంది","గాలి కూడా నీ కోసం పాడుతోంది"]},{"i":4,"fn":"v","moods":["rom"],"lines":["నీ లేకుండా సగం అవుతుంది ప్రతి నవ్వు","రాత్రంతా మేల్కొని ఉంటుంది మనసు"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["ఈ {t} మాటలు, ఈ {t} రోజులు","నీ లేకుండా అన్నీ అసంపూర్ణంగా ఉంటాయి"]},{"i":6,"fn":"v","moods":["hea"],"lines":["నువ్వు వెళ్ళాక అన్నీ ఆగిపోయాయి","అయినా ఈ మనసు ఇంకా నీదే"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["నేను అన్ని అద్దాలను పగలగొట్టాను","ఎందుకంటే వాటిలో నీ ముఖం కనిపించింది"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ఆ స్కూల్ పైకప్పు, ఆ వర్షపు రోజు","మనం ఇంటికి వెళ్ళడం మర్చిపోయాం"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["స్నేహితుల గుంపు, డోలు చప్పుడు","ఈ రోజు మనసు అంది — నాట్యం చేస్తూనే ఉండు"]},{"i":10,"fn":"v","moods":["mot"],"lines":["పడిపోతే ఏమిటి, లేవాలి కూడా","ఆకాశానికి అవతల ఎగరాలి కూడా"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["నెమ్మది గాలి, మూసిన కళ్ళు, తెరిచిన ఆకాశం","తొందర లేదు, ఈ క్షణం చాలు"]},{"i":12,"fn":"c","moods":["rom"],"lines":["నీ పేరు రాగం నా పెదవులపై","ఎక్కడికి వెళ్ళినా అదే పాడతా"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["రా, రా, ఈ రాత్రి పిలుస్తోంది","నీ లేకుండా మనసు భయపడుతోంది"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["నువ్వు వెళ్ళావు, కానీ పాట మిగిలింది","మనసు మూలలో నీ ఇల్లు మిగిలింది"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["ఈ రోజు నాట్యం చేద్దాం, పాడుదాం","అన్ని బాధలు మర్చిపోదాం"]},{"i":16,"fn":"c","moods":["mot"],"lines":["నేను ఆగను, నేను వంగను","నాది నాకు ఇక్కడే దొరుకుతుంది"]},{"i":17,"fn":"b","moods":["rom"],"lines":["ఈ రాత్రి ఎప్పుడూ ముగియకపోతే","నీ చెయ్యి పట్టుకుని కూర్చుంటా"]},{"i":18,"fn":"b","moods":["hea"],"lines":["నేను బాగున్నా, మళ్ళీ మళ్ళీ అడగకు","కళ్ళు వేరే ఏదో చెబుతున్నాయి"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ప్రతి పతనం తర్వాత ఒక ఎగరడం","ప్రతి చీకటి వెనుక ఒక ఉదయం"]}]},"Kannada":{"script":"kann","titles":["{t}","{t} ರಾಗ","ನೀನಿಲ್ಲದೆ","ಹಳೆಯ ಗಲ್ಲಿ","ಮತ್ತೆ ಭೇಟಿಯಾಗೋಣ","ಮನಸಿನ ಹಾಡು"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["ನಿನ್ನ ನೆನಪಿನ ಮಳೆಯಲ್ಲಿ ಒದ್ದೆಯಾಗುತ್ತದೆ ಮನಸು","ಪ್ರತಿ ಹನಿಯೂ ನಿನ್ನ ಹೆಸರು ಬರೆಯುತ್ತದೆ"]},{"i":1,"fn":"o","moods":["nos"],"lines":["ಹಳೆಯ ಗಲ್ಲಿ, ಅದೇ ಚಹಾ ಅಂಗಡಿ","ನಿನ್ನ ನಗು ಇನ್ನೂ ಪ್ರತಿಧ್ವನಿಸುತ್ತದೆ"]},{"i":2,"fn":"o","moods":["mel"],"lines":["ಖಾಲಿ ಕೋಣೆಯಲ್ಲಿ ಒಂದು ದೀಪ ಉರಿಯುತ್ತದೆ","ನಿನ್ನ ನೆರಳು ಇನ್ನೂ ಹತ್ತಿರವಿಲ್ಲ"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["ಇಂದು ಬೆಳಗು ಹೊಸ ಬಣ್ಣ ಆರಿಸಿಕೊಂಡಿತು","ಗಾಳಿಯೂ ನಿನಗಾಗಿ ಹಾಡುತ್ತದೆ"]},{"i":4,"fn":"v","moods":["rom"],"lines":["ನೀನಿಲ್ಲದೆ ಅರ್ಧವಾಗುತ್ತದೆ ಪ್ರತಿ ನಗು","ರಾತ್ರಿಯೆಲ್ಲ ಎಚ್ಚರವಾಗಿರುತ್ತದೆ ಮನಸು"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["ಈ {t} ಮಾತುಗಳು, ಈ {t} ದಿನಗಳು","ನೀನಿಲ್ಲದೆ ಎಲ್ಲವೂ ಅಪೂರ್ಣ ಅನಿಸುತ್ತದೆ"]},{"i":6,"fn":"v","moods":["hea"],"lines":["ನೀನು ಹೋದ ಮೇಲೆ ಎಲ್ಲವೂ ನಿಂತುಹೋಯಿತು","ಆದರೂ ಈ ಮನಸು ಇನ್ನೂ ನಿನ್ನದೇ"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["ನಾನು ಎಲ್ಲಾ ಕನ್ನಡಿಗಳನ್ನು ಒಡೆದೆ","ಏಕೆಂದರೆ ಅವುಗಳಲ್ಲಿ ನಿನ್ನ ಮುಖ ಕಾಣುತ್ತಿತ್ತು"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ಆ ಶಾಲೆಯ ಛಾವಣಿ, ಆ ಮಳೆಯ ದಿನ","ನಾವು ಮನೆಗೆ ಹೋಗುವುದನ್ನೇ ಮರೆತೆವು"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["ಸ್ನೇಹಿತರ ಗುಂಪು, ಡೋಲಿನ ಶಬ್ದ","ಇಂದು ಮನಸು ಹೇಳಿತು — ನೃತ್ಯ ಮಾಡುತ್ತಿರು"]},{"i":10,"fn":"v","moods":["mot"],"lines":["ಬಿದ್ದರೆ ಏನು, ಎದ್ದೇಳಬೇಕು","ಆಕಾಶದ ಆಚೆಗೆ ಹಾರಬೇಕು"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ನಿಧಾನ ಗಾಳಿ, ಮುಚ್ಚಿದ ಕಣ್ಣು, ತೆರೆದ ಆಕಾಶ","ಆತುರವಿಲ್ಲ, ಈ ಕ್ಷಣ ಸಾಕು"]},{"i":12,"fn":"c","moods":["rom"],"lines":["ನಿನ್ನ ಹೆಸರ ರಾಗ ನನ್ನ ತುಟಿಯಲ್ಲಿ","ಎಲ್ಲಿಗೆ ಹೋದರೂ ಅದನ್ನೇ ಹಾಡುವೆ"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["ಬಾ, ಬಾ, ಈ ರಾತ್ರಿ ಕರೆಯುತ್ತದೆ","ನೀನಿಲ್ಲದೆ ಮನಸು ಹೆದರುತ್ತದೆ"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["ನೀನು ಹೋದೆ, ಆದರೆ ಹಾಡು ಉಳಿಯಿತು","ಮನಸಿನ ಮೂಲೆಯಲ್ಲಿ ನಿನ್ನ ಮನೆ ಉಳಿಯಿತು"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["ಇಂದು ಕುಣಿಯೋಣ, ಇಂದು ಹಾಡೋಣ","ಎಲ್ಲಾ ದುಃಖ ಮರೆತು ಬರೋಣ"]},{"i":16,"fn":"c","moods":["mot"],"lines":["ನಾನು ನಿಲ್ಲುವುದಿಲ್ಲ, ನಾನು ಬಾಗುವುದಿಲ್ಲ","ನನ್ನದು ನನಗೆ ಇಲ್ಲಿಯೇ ಸಿಗುತ್ತದೆ"]},{"i":17,"fn":"b","moods":["rom"],"lines":["ಈ ರಾತ್ರಿ ಎಂದಿಗೂ ಮುಗಿಯದಿದ್ದರೆ","ನಿನ್ನ ಕೈ ಹಿಡಿದು ಕುಳಿತಿರುವೆ"]},{"i":18,"fn":"b","moods":["hea"],"lines":["ನಾನು ಚೆನ್ನಾಗಿದ್ದೇನೆ, ಮತ್ತೆ ಮತ್ತೆ ಕೇಳಬೇಡ","ಕಣ್ಣುಗಳು ಬೇರೆ ಏನೋ ಹೇಳುತ್ತವೆ"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ಪ್ರತಿ ಬೀಳುವಿಕೆಯ ನಂತರ ಒಂದು ಹಾರಾಟ","ಪ್ರತಿ ಕತ್ತಲೆಯ ಹಿಂದೆ ಒಂದು ಬೆಳಗು"]}]},"Malayalam":{"script":"mlym","titles":["{t}","{t} രാഗം","നീയില്ലാതെ","പഴയ തെരുവ്","വീണ്ടും കാണാം","മനസ്സിന്റെ പാട്ട്"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["നിന്റെ ഓർമ്മയുടെ മഴയിൽ നനയുന്നു മനസ്സ്","ഓരോ തുള്ളിയും നിന്റെ പേര് എഴുതുന്നു"]},{"i":1,"fn":"o","moods":["nos"],"lines":["പഴയ തെരുവ്, അതേ ചായക്കട","നിന്റെ ചിരി ഇന്നും പ്രതിധ്വനിക്കുന്നു"]},{"i":2,"fn":"o","moods":["mel"],"lines":["കാലിയായ മുറിയിൽ ഒരു വിളക്ക് കത്തുന്നു","നിന്റെ നിഴൽ ഇന്നും അടുത്തില്ല"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["ഇന്ന് പുലരി പുതിയ നിറം തിരഞ്ഞെടുത്തു","കാറ്റും നിനക്കായി പാടുന്നു"]},{"i":4,"fn":"v","moods":["rom"],"lines":["നീയില്ലാതെ പകുതിയാകുന്നു ഓരോ ചിരിയും","രാത്രി മുഴുവൻ ഉണർന്നിരിക്കുന്നു മനസ്സ്"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["ഈ {t} വാക്കുകൾ, ഈ {t} ദിവസങ്ങൾ","നീയില്ലാതെ എല്ലാം അപൂർണ്ണമാകുന്നു"]},{"i":6,"fn":"v","moods":["hea"],"lines":["നീ പോയതിനു ശേഷം എല്ലാം നിന്നുപോയി","എന്നിട്ടും ഈ മനസ്സ് ഇന്നും നിന്റേതാണ്"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["ഞാൻ എല്ലാ കണ്ണാടികളും ഉടച്ചു","കാരണം അവയിൽ നിന്റെ മുഖം കാണാമായിരുന്നു"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ആ സ്കൂൾ മേൽക്കൂര, ആ മഴയുള്ള ദിവസം","ഞങ്ങൾ വീട്ടിൽ പോകാൻ മറന്നു"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["സുഹൃത്തുക്കളുടെ കൂട്ടം, ചെണ്ടയുടെ ശബ്ദം","ഇന്ന് മനസ്സ് പറഞ്ഞു — നൃത്തം ചെയ്തുകൊണ്ടിരിക്കൂ"]},{"i":10,"fn":"v","moods":["mot"],"lines":["വീണാൽ എന്ത്, എഴുന്നേൽക്കണം","ആകാശത്തിനപ്പുറം പറക്കണം"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["പതിയെ വരുന്ന കാറ്റ്, അടഞ്ഞ കണ്ണുകൾ, തുറന്ന ആകാശം","തിരക്കില്ല, ഈ നിമിഷം മതി"]},{"i":12,"fn":"c","moods":["rom"],"lines":["നിന്റെ പേരിന്റെ രാഗം എന്റെ ചുണ്ടിൽ","എവിടെ പോയാലും അതു പാടും"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["വാ, വാ, ഈ രാത്രി വിളിക്കുന്നു","നീയില്ലാതെ മനസ്സ് പേടിക്കുന്നു"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["നീ പോയി, പക്ഷേ പാട്ട് അവശേഷിച്ചു","മനസ്സിന്റെ മൂലയിൽ നിന്റെ വീട് അവശേഷിച്ചു"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["ഇന്ന് ആടാം, ഇന്ന് പാടാം","എല്ലാ ദുഃഖവും മറന്നു വരാം"]},{"i":16,"fn":"c","moods":["mot"],"lines":["ഞാൻ നിൽക്കില്ല, ഞാൻ കുനിയില്ല","എന്റേത് എനിക്ക് ഇവിടെ കിട്ടും"]},{"i":17,"fn":"b","moods":["rom"],"lines":["ഈ രാത്രി ഒരിക്കലും അവസാനിക്കുന്നില്ലെങ്കിൽ","നിന്റെ കൈ പിടിച്ച് ഇരിക്കും"]},{"i":18,"fn":"b","moods":["hea"],"lines":["ഞാൻ കുഴപ്പമില്ല, വീണ്ടും വീണ്ടും ചോദിക്കരുത്","കണ്ണുകൾ മറ്റെന്തോ പറയുന്നു"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["ഓരോ വീഴ്ചയ്ക്കും ശേഷം ഒരു പറക്കൽ","ഓരോ ഇരുളിനു പിന്നിലും ഒരു പുലരി"]}]},"Odia":{"script":"oriya","titles":["{t}","{t} ର ସୁର","ତୋ ବିନା","ପୁରୁଣା ଗଳି","ପୁଣି ଭେଟିବା"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["ତୋ ସ୍ମୃତିର ବର୍ଷାରେ ଭିଜେ ମନ","ପ୍ରତି ବୁନ୍ଦା ତୋ ନାମ ଲେଖେ"]},{"i":1,"fn":"o","moods":["nos"],"lines":["ପୁରୁଣା ଗଳି, ସେହି ଚା ଦୋକାନ","ତୋ ହସ ଆଜି ବି ଗୁଞ୍ଜରିତ"]},{"i":2,"fn":"o","moods":["joy","mot"],"lines":["ଆଜି ସୂର୍ଯ୍ୟ ନୂଆ ରଙ୍ଗ ବାଛିଲା","ପବନ ବି ତୋ ପାଇଁ ଗାଏ"]},{"i":3,"fn":"v","moods":["rom"],"lines":["ତୋ ବିନା ଅଧା ହୁଏ ପ୍ରତି ହସ","ରାତିସାରା ଜାଗେ ଏ ମନ"]},{"i":4,"fn":"v","moods":["rom","nos"],"lines":["ଏହି {t} ର କଥା, ଏହି {t} ର ଦିନ","ତୋ ବିନା ସବୁ ଅଧୁରା ଲାଗେ"]},{"i":5,"fn":"v","moods":["hea"],"lines":["ତୁ ଗଲା ପରେ ସବୁ ଅଟକିଗଲା","ତଥାପି ଏ ମନ ଆଜି ବି ତୋର"]},{"i":6,"fn":"v","moods":["nos"],"lines":["ସେ ବିଦ୍ୟାଳୟର ଛାତ, ସେ ବର୍ଷା ଦିନ","ଆମେ ଘରକୁ ଯିବା ଭୁଲିଗଲୁ"]},{"i":7,"fn":"v","moods":["mot"],"lines":["ପଡ଼ିଲେ କି ହେବ, ଉଠିବା ବି ତ ଅଛି","ଆକାଶ ଉପରେ ଉଡ଼ିବା ବି ଅଛି"]},{"i":8,"fn":"c","moods":["rom"],"lines":["ତୋ ନାମର ସୁର ମୋ ଓଠରେ","ଯେଠାରେ ଯାଏ ସେଠାରେ ଗାଏ"]},{"i":9,"fn":"c","moods":["rom","ene"],"lines":["ଆସ, ଆସ, ଏ ରାତି ଡାକେ","ତୋ ବିନା ଏ ମନ ଡରେ"]},{"i":10,"fn":"c","moods":["hea","mel"],"lines":["ତୁ ଗଲୁ, କିନ୍ତୁ ଗୀତ ରହିଗଲା","ମନର କୋଣରେ ତୋ ଘର ରହିଗଲା"]},{"i":11,"fn":"c","moods":["joy","fun"],"lines":["ଆଜି ନାଚିବା, ଆଜି ଗାଇବା","ସବୁ ଦୁଃଖ ଭୁଲିଯିବା"]},{"i":12,"fn":"b","moods":["rom"],"lines":["ଏ ରାତି ଯଦି କେବେ ନସରେ","ତୋ ହାତ ଧରି ବସିରହେ"]},{"i":13,"fn":"b","moods":["mot","ene"],"lines":["ପ୍ରତି ପତନ ପରେ ଏକ ଉଡ଼ାଣ","ପ୍ରତି ଅନ୍ଧାର ପଛେ ଏକ ସକାଳ"]}]},"Bhojpuri":{"script":"deva","titles":["{t}","{t} के गीत","तोहरा बिना","पुरान गली","फेरु मिलब"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["तोहर याद के बरखा में भीगल बा दिल","हर बूँद तोहर नाम लिखेला"]},{"i":1,"fn":"o","moods":["nos"],"lines":["पुरान गली, ओही चाय के दुकान","तोहर हँसी अबहूँ गूँजेला"]},{"i":2,"fn":"o","moods":["joy","mot"],"lines":["आज सूरुज नया रंग चुनलस","हवा भी तोहरा खातिर गावेला"]},{"i":3,"fn":"v","moods":["rom"],"lines":["तोहरा बिना आधा बा हर मुस्कान","रात भर जागेला ई अरमान"]},{"i":4,"fn":"v","moods":["rom","nos"],"lines":["ई {t} के बात, ई {t} के दिन","तोहरा बिना सब अधूरा लागे"]},{"i":5,"fn":"v","moods":["hea"],"lines":["तू चल गइल त सब छूट गइल","ई दिल अबहूँ तोहरे रहल"]},{"i":6,"fn":"v","moods":["nos"],"lines":["ओही स्कूल के छत, ओही बरसात","हमनी घर जाए के भूल गइलीं"]},{"i":7,"fn":"v","moods":["joy","ene"],"lines":["दोस्तन के महफिल, ढोल के थाप","आज दिल कहलस — बस नाचत रहीं"]},{"i":8,"fn":"v","moods":["mot"],"lines":["गिरल त का भइल, उठे के भी बा","आसमान से आगे उड़े के भी बा"]},{"i":9,"fn":"c","moods":["rom"],"lines":["तोहर नाम के धुन बा ओठ पर","जहाँ जाइब, ओही गाइब"]},{"i":10,"fn":"c","moods":["rom","ene"],"lines":["आ जा, आ जा, ई रात बोलावे","तोहरा बिना ई दिल घबरावे"]},{"i":11,"fn":"c","moods":["hea","mel"],"lines":["तू जा चुकल, गाना रहि गइल","दिल के कोना में तोहर ठिकाना रहि गइल"]},{"i":12,"fn":"c","moods":["joy","fun"],"lines":["आज नाचीं, आज गाईं","सब गम भुला के आईं"]},{"i":13,"fn":"b","moods":["rom"],"lines":["ई रात कबो खतम ना होखे","तोहर हाथ धरि के बइठल रहीं"]},{"i":14,"fn":"b","moods":["mot","ene"],"lines":["हर गिरावट के बाद उड़ान बा","हर अँधेरा के पाछे सुबह बा"]}]},"Nepali":{"script":"deva","titles":["{t}","{t} को धुन","तिमी बिना","पुरानो बाटो","फेरि भेटौंला","मनको गीत"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["तिम्रो सम्झनाको पानीमा भिज्छ मन","हरेक थोपा तिम्रो नाम लेख्छ"]},{"i":1,"fn":"o","moods":["nos"],"lines":["पुरानो गल्ली, त्यही चिया पसल","तिम्रो हाँसो अझै गुन्जिन्छ यहाँ"]},{"i":2,"fn":"o","moods":["mel"],"lines":["खाली कोठामा बल्छ एउटा दियो","तिम्रो छाया तैपनि नजिक छैन"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["आज बिहानले नयाँ रङ रोज्यो","हावा पनि तिम्रै लागि गाउँछ"]},{"i":4,"fn":"v","moods":["rom"],"lines":["तिमी बिना आधा छ हरेक हाँसो","रातभर जाग्छ यो मन"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["यी {t} का कुरा, यी {t} का दिन","तिमी बिना सबै अपुरो लाग्छ"]},{"i":6,"fn":"v","moods":["hea"],"lines":["तिमी गएपछि सबै रोकियो","तैपनि यो मन अझै तिम्रै छ"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["मैले सबै ऐना फुटाएँ","किनकि तीमा तिम्रो अनुहार देखिन्थ्यो"]},{"i":8,"fn":"v","moods":["nos"],"lines":["त्यो स्कुलको छत, त्यो वर्षाको दिन","हामी घर जानै बिर्सेका थियौं"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["साथीहरूको जमघट, मादलको ताल","आज मनले भन्यो — नाचिरहनु"]},{"i":10,"fn":"v","moods":["mot"],"lines":["लड्यौं भने के भो, उठ्नु पनि त छ","आकाशभन्दा माथि उड्नु पनि त छ"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["हल्का हावा, बन्द आँखा, खुला आकाश","कुनै हतार छैन, यही क्षण मात्र"]},{"i":12,"fn":"c","moods":["rom"],"lines":["तिम्रो नामको धुन ओठमा छ","जहाँ जाऊँ त्यही गाउँछु म"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["आउ न, आउ न, यो रात बोलाउँछ","तिमी बिना यो मन डराउँछ"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["तिमी गयौ, तर गीत रह्यो","मनको कुनामा तिम्रो घर रह्यो"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["आज नाचौं, आज गाऔं","सबै दुःख बिर्सेर जाऔं"]},{"i":16,"fn":"c","moods":["mot"],"lines":["म रोकिन्न, म झुकिन्न","जे मेरो हो त्यो यहीँ भेटिनेछ"]},{"i":17,"fn":"b","moods":["rom"],"lines":["यो रात कहिल्यै नसकियोस्","तिम्रो हात समातेर बसिरहूँ"]},{"i":18,"fn":"b","moods":["hea"],"lines":["म ठीक छु, नसोध है बारम्बार","आँखाले अरू केही भन्छन्"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["हरेक खस्काइपछि एउटा उडान छ","हरेक अँध्यारोपछि एउटा बिहान"]}]},"Spanish":{"script":"latin","titles":["{t}","{t} en mi voz","Sin ti","Una noche más","Media canción"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Llueve en la ventana y escribo tu nombre","Cada gota es algo que no dije"]},{"i":1,"fn":"o","moods":["nos"],"lines":["La misma calle, la misma tienda","Tu risa todavía vive en la puerta"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Una lámpara encendida en la habitación vacía","La oscuridad guarda tu lado"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["El sol salió con un color que nunca vi","Toda la calle canta desafinada"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Media sonrisa es todo lo que tengo sin ti","La otra mitad espera junto al teléfono"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} en mi cabeza, {t} otra vez","Todo suena un poco desafinado"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Te fuiste y la habitación se detuvo","Sigo de pie donde dejaste mi nombre"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Rompí todos los espejos de la casa","Porque seguían mostrando tu cara"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Aquel tejado, aquella lluvia de agosto","Olvidamos el camino de vuelta"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Amigos en la cocina, tambores en la pared","Nadie se va hasta que el altavoz muera"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Caer es otra forma de volar","Ya estuve abajo, conozco la subida"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Viento lento, ojos cerrados, cielo abierto","Nada llega tarde, nada es mío"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Tu nombre es una melodía en mis labios","La canto dondequiera que voy"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Ven, ven, la noche sigue llamando","Sin ti mi corazón suena demasiado"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Te fuiste pero la canción quedó","Todavía hay un cuarto con tu forma en mí"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Hoy bailamos, hoy cantamos","Dejamos la tristeza en la puerta"]},{"i":16,"fn":"c","moods":["mot"],"lines":["No me detengo, no me doblo","Lo que es mío lo encuentro aquí"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Si esta noche no tuviera que acabar","Te tomaría la mano y la dejaría correr"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Estoy bien, no preguntes dos veces","Mis ojos me delatan"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Cada caída es una pista de despegue","Cada oscuridad es una mañana"]}]},"French":{"script":"latin","titles":["{t}","{t} dans ma voix","Sans toi","Encore une nuit","Une demi-chanson"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["La pluie sur la vitre écrit ton prénom","Chaque goutte est un mot que j'ai tu"]},{"i":1,"fn":"o","moods":["nos"],"lines":["La même rue, la même épicerie","Ton rire habite encore la porte"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Une lampe brûle dans la chambre vide","Le noir garde ta place dans le lit"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Le soleil s'est levé dans une couleur nouvelle","Toute la rue chante faux"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Un demi-sourire, c'est tout ce que j'ai sans toi","L'autre moitié attend près du téléphone"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} dans ma tête, {t} en boucle","Tout sonne un peu faux"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Tu es partie et la pièce s'est arrêtée","Je reste là où tu as laissé mon nom"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["J'ai cassé tous les miroirs de la maison","Ils n'arrêtaient pas de montrer ton visage"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Ce toit, cette pluie d'août","On a oublié le chemin du retour"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Des amis dans la cuisine, des tambours aux murs","Personne ne part avant la fin du son"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Tomber, c'est une autre façon de voler","J'ai déjà connu le fond, je connais la montée"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Vent lent, yeux fermés, ciel ouvert","Rien n'est en retard, rien n'est à moi"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Ton prénom est une mélodie sur mes lèvres","Je la chante partout où je vais"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Viens, viens, la nuit continue d'appeler","Sans toi mon cœur sonne trop fort"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Tu es partie mais la chanson est restée","Il reste une pièce à ta forme en moi"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Ce soir on danse, ce soir on chante","On laisse le chagrin à la porte"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Je ne m'arrête pas, je ne plie pas","Ce qui est à moi, je le trouverai ici"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Si cette nuit ne devait jamais finir","Je prendrais ta main et je laisserais courir"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Ça va, ne demande pas deux fois","Mes yeux me trahissent"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Chaque chute est une piste déguisée","Chaque nuit cache un matin"]}]},"German":{"script":"latin","titles":["{t}","{t} in meiner Stimme","Ohne dich","Noch eine Nacht","Halbes Lied"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Regen am Fenster schreibt deinen Namen","Jeder Tropfen ein Wort, das ich verschwieg"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Dieselbe Straße, derselbe Laden","Dein Lachen wohnt noch in der Tür"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Eine Lampe brennt im leeren Zimmer","Das Dunkel hält deine Seite vom Bett"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Die Sonne kam in einer neuen Farbe","Die ganze Straße singt schief"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Ein halbes Lächeln ist alles ohne dich","Die andre Hälfte wartet am Telefon"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} im Kopf, {t} auf Repeat","Alles klingt ein bisschen schief"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Du gingst und das Zimmer stand still","Ich stehe noch, wo du meinen Namen fallen ließt"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Ich habe jeden Spiegel zerbrochen","Weil sie immer dein Gesicht zeigten"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Dieses Dach, dieser Augustregen","Wir vergaßen den Weg nach Haus"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Freunde in der Küche, Trommeln an der Wand","Niemand geht, bis der Lautsprecher stirbt"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Fallen ist nur eine andre Art zu fliegen","Ich war schon unten, ich kenne den Weg"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Langsamer Wind, geschlossne Augen, offner Himmel","Nichts ist spät, nichts gehört mir"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Dein Name ist eine Melodie auf meinen Lippen","Ich singe sie, wohin ich geh"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Komm, komm, die Nacht ruft weiter","Ohne dich klingt mein Herz zu laut"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Du bist fort, das Lied blieb","In mir ist noch ein Zimmer in deiner Form"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Heute tanzen wir, heute singen wir","Der Kummer bleibt an der Tür"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Ich halte nicht an, ich beuge mich nicht","Was mein ist, finde ich hier"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Wenn diese Nacht nie enden müsste","Hielte ich deine Hand und ließe sie laufen"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Mir geht's gut, frag nicht zweimal","Meine Augen verraten mich"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Jeder Fall ist eine Startbahn","Jede Dunkelheit hat einen Morgen"]}]},"Portuguese":{"script":"latin","titles":["{t}","{t} na minha voz","Sem você","Mais uma noite","Meia canção"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Chove na janela e escrevo seu nome","Cada gota é uma palavra que calei"]},{"i":1,"fn":"o","moods":["nos"],"lines":["A mesma rua, a mesma padaria","Seu riso ainda mora na porta"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Uma lâmpada acesa no quarto vazio","O escuro guarda o seu lado da cama"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["O sol nasceu com uma cor que eu nunca vi","A rua inteira canta desafinada"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Meio sorriso é tudo que eu tenho sem você","A outra metade espera pelo telefone"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} na cabeça, {t} em repeat","Tudo soa um pouco fora do tom"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Você foi embora e o quarto parou","Eu ainda estou onde você deixou meu nome"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Quebrei todos os espelhos da casa","Porque eles mostravam o seu rosto"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Aquele telhado, aquela chuva de agosto","Esquecemos o caminho de casa"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Amigos na cozinha, tambores na parede","Ninguém sai até o som morrer"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Cair é só outro jeito de voar","Já estive embaixo, eu sei a subida"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Vento lento, olhos fechados, céu aberto","Nada está atrasado, nada é meu"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Seu nome é uma melodia nos meus lábios","Eu canto aonde quer que eu vá"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Vem, vem, a noite continua chamando","Sem você meu peito soa alto demais"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Você se foi, mas a canção ficou","Ainda tem um quarto com o seu formato em mim"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Hoje a gente dança, hoje a gente canta","Deixamos a tristeza na porta"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Eu não paro, eu não dobro","O que é meu eu encontro aqui"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Se essa noite nunca terminasse","Eu seguraria sua mão e deixaria correr"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Estou bem, não pergunte duas vezes","Meus olhos me entregam"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Cada queda é uma pista disfarçada","Cada escuro esconde uma manhã"]}]},"Italian":{"script":"latin","titles":["{t}","{t} nella mia voce","Senza te","Un'altra notte","Mezza canzone"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Piove sul vetro e scrivo il tuo nome","Ogni goccia è una parola che ho taciuto"]},{"i":1,"fn":"o","moods":["nos"],"lines":["La stessa strada, lo stesso bar","La tua risata abita ancora la porta"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Una lampada accesa nella stanza vuota","Il buio tiene il tuo lato del letto"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Il sole è uscito con un colore mai visto","Tutta la strada canta stonata"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Mezzo sorriso è tutto quello che ho senza te","L'altra metà aspetta accanto al telefono"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} in testa, {t} in repeat","Tutto suona un po' stonato"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Te ne sei andata e la stanza si è fermata","Sono ancora dove hai lasciato il mio nome"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Ho rotto tutti gli specchi di casa","Perché mostravano sempre il tuo viso"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Quel tetto, quella pioggia d'agosto","Abbiamo dimenticato la strada di casa"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Amici in cucina, tamburi sul muro","Nessuno esce finché la cassa vive"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Cadere è solo un altro modo di volare","Sono già stato giù, conosco la salita"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Vento lento, occhi chiusi, cielo aperto","Niente è in ritardo, niente è mio"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Il tuo nome è una melodia sulle mie labbra","La canto ovunque vado"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Vieni, vieni, la notte continua a chiamare","Senza te il cuore suona troppo forte"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Te ne sei andata ma la canzone è rimasta","C'è ancora una stanza a forma tua in me"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Stasera balliamo, stasera cantiamo","Lasciamo il dolore alla porta"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Non mi fermo, non mi piego","Quello che è mio lo trovo qui"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Se questa notte non dovesse finire mai","Ti terrei la mano e lascerei correre"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Sto bene, non chiedere due volte","I miei occhi mi tradiscono"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Ogni caduta è una pista travestita","Ogni buio nasconde un mattino"]}]},"Arabic":{"script":"arab","titles":["{t}","{t} في صوتي||{t} fi sawti","بدونك||bidoonak","ليلة أخرى||layla ukhra","نصف أغنية||nisf ughniya"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["المطر على النافذة يكتب اسمك||al-matar 'ala al-nafidha yaktub ismak","كل قطرة كلمة لم أقلها||kull qatra kalima lam aqulha"]},{"i":1,"fn":"o","moods":["nos"],"lines":["نفس الشارع، نفس الدكان||nafs al-shari', nafs al-dukkan","ضحكتك تسكن الباب حتى الآن||dahkatuk taskun al-baab hatta al-aan"]},{"i":2,"fn":"o","moods":["mel"],"lines":["مصباح يشتعل في الغرفة الفارغة||misbaah yashta'il fi al-ghurfa al-faarigha","الظلام يحفظ جانبك من السرير||al-zalaam yahfaz jaanibak min al-sareer"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["الشمس أشرقت بلون لم أره||al-shams ashraqat bi-lawn lam arah","الشارع كله يغني خارج اللحن||al-shaari' kulluh yughanni khaarij al-lahn"]},{"i":4,"fn":"v","moods":["rom"],"lines":["نصف ابتسامة كل ما أملك بدونك||nisf ibtisaama kull ma amlik bidoonak","النصف الآخر ينتظر عند الهاتف||al-nisf al-aakhar yantazir 'ind al-haatif"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} في رأسي، {t} يعود||{t} fi raasi, {t} ya'ood","كل شيء يبدو خارج اللحن قليلاً||kull shay' yabdoo khaarij al-lahn qaleelan"]},{"i":6,"fn":"v","moods":["hea"],"lines":["رحلت فتوقف كل شيء في الغرفة||rahalt fa-tawaqqafa kull shay' fi al-ghurfa","ما زلت واقفاً حيث تركت اسمي||ma zilt waaqifan hayth tarakat ismi"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["كسرت كل المرايا في البيت||kasartu kull al-maraya fi al-bayt","لأنها كانت تريني وجهك||li-annaha kaant tareeni wajhak"]},{"i":8,"fn":"v","moods":["nos"],"lines":["ذلك السطح، ذلك المطر في آب||dhaalik al-sath, dhaalik al-matar fi aab","نسينا طريق العودة إلى البيت||naseena tareeq al-'awda ila al-bayt"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["أصدقاء في المطبخ، طبول على الجدار||asdiqaa' fi al-matbakh, tubool 'ala al-jidaar","لا أحد يخرج قبل أن يصمت الصوت||la ahad yakhruj qabl an yasmut al-sawt"]},{"i":10,"fn":"v","moods":["mot"],"lines":["السقوط طريقة أخرى للطيران||al-suqoot tareeqa ukhra li-l-tayaraan","سقطت قبلاً وأعرف الصعود||saqatt qablan wa-a'rif al-su'ood"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ريح هادئة، عيون مغلقة، سماء مفتوحة||reeh haadi'a, 'uyoon mughlaqa, samaa' maftooha","لا شيء متأخر، لا شيء لي||la shay' muta'akhkhir, la shay' lee"]},{"i":12,"fn":"c","moods":["rom"],"lines":["اسمك لحن على شفتيّ||ismak lahn 'ala shafatayya","أغنيه أينما ذهبت||ugannihi aynamma dhahabt"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["تعال، تعال، الليل ما زال ينادي||ta'aal, ta'aal, al-layl ma zaal yunaadi","بدونك قلبي يرتفع صوته كثيراً||bidoonak qalbi yartafi' sawtuhu katheeran"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["رحلت لكن الأغنية بقيت||rahalt lakin al-ughniya baqiyat","ما زال في داخلي بيت على شكل قلبك||ma zaal fi daakhili bayt 'ala shakl qalbak"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["الليلة نرقص، الليلة نغني||al-layla narqus, al-layla nughanni","نترك الحزن عند الباب||natruk al-huzn 'ind al-baab"]},{"i":16,"fn":"c","moods":["mot"],"lines":["لن أتوقف ولن أنحني||lan atawaqqaf wa-lan anhanee","ما هو لي سأجده هنا||ma huwa lee sa-ajiduh huna"]},{"i":17,"fn":"b","moods":["rom"],"lines":["لو لم تنته هذه الليلة أبداً||law lam tantahi haadhihi al-layla abadan","لأمسكت يدك وتركتها تجري||la-amsakt yadak wa-taraktaha tajree"]},{"i":18,"fn":"b","moods":["hea"],"lines":["أنا بخير، لا تسأل مرتين||ana bikhayr, la tas'al marratayn","عيوني تفضحني||'uyooni tafdahuni"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["كل سقوط مدرج متنكر||kull suqoot mudarraj mutanakkir","كل ظلام يخفي صباحاً||kull zalaam yukhfi sabaahan"]}]},"Turkish":{"script":"latin","titles":["{t}","{t} sesimde","Sensiz","Bir Gece Daha","Yarım Şarkı"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Camda yağmur, adını yazıyor","Her damla söyleyemediğim bir söz"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Aynı sokak, aynı bakkal","Gülüşün hâlâ kapıda yaşıyor"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Boş odada bir lamba yanıyor","Karanlık yatağın senin tarafını tutuyor"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Güneş hiç görmediğim bir renkle doğdu","Bütün sokak detone söylüyor"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Yarım bir gülüş, sensiz elimde olan","Diğer yarısı telefonda bekliyor"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} kafamda, {t} tekrar tekrar","Her şey biraz detone geliyor"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Gittin ve oda durdu","Hâlâ adımı bıraktığın yerde duruyorum"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Evdeki bütün aynaları kırdım","Çünkü hep yüzünü gösteriyorlardı"]},{"i":8,"fn":"v","moods":["nos"],"lines":["O çatı, o ağustos yağmuru","Eve dönüş yolunu unuttuk"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Mutfakta dostlar, duvarda davullar","Ses kesilmeden kimse gitmiyor"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Düşmek uçmanın başka bir yolu","Daha önce de düştüm, tırmanışı bilirim"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Yavaş rüzgâr, kapalı gözler, açık gökyüzü","Hiçbir şey geç değil, hiçbir şey benim değil"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Adın dudaklarımda bir melodi","Nereye gitsem onu söylüyorum"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Gel, gel, gece hâlâ çağırıyor","Sensiz kalbim fazla yüksek sesle"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Gittin ama şarkı kaldı","İçimde hâlâ senin şeklinde bir oda var"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Bu gece dans, bu gece şarkı","Kederi kapıda bırakıyoruz"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Durmayacağım, eğilmeyeceğim","Benim olanı burada bulacağım"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Bu gece hiç bitmeseydi","Elini tutar, bırakırdım akışına"]},{"i":18,"fn":"b","moods":["hea"],"lines":["İyiyim, iki kere sorma","Gözlerim beni ele veriyor"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Her düşüş kılık değiştirmiş bir pist","Her karanlıkta bir sabah var"]}]},"Russian":{"script":"cyrl","titles":["{t}","{t} в моём голосе","Без тебя","Ещё одна ночь","Половина песни"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Дождь на стекле пишет твоё имя","Каждая капля — слово, что я скрыл"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Та же улица, тот же магазин","Твой смех до сих пор живёт в двери"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Одна лампа горит в пустой комнате","Темнота хранит твою сторону кровати"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Солнце взошло в цвете, которого я не знал","Вся улица поёт фальшиво"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Полуулыбка — всё, что есть без тебя","Вторая половина ждёт у телефона"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} в голове, {t} снова и снова","Всё звучит немного фальшиво"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Ты ушла, и комната замерла","Я всё ещё там, где ты оставила моё имя"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Я разбил все зеркала в доме","Они всё время показывали твоё лицо"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Та крыша, тот августовский дождь","Мы забыли дорогу домой"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Друзья на кухне, барабаны на стене","Никто не уйдёт, пока не умрёт звук"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Падать — просто другой способ летать","Я уже был внизу, я знаю подъём"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Тихий ветер, закрытые глаза, открытое небо","Ничто не поздно, ничто не моё"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Твоё имя — мелодия на моих губах","Я пою её везде, куда иду"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Иди, иди, ночь всё ещё зовёт","Без тебя моё сердце слишком громко"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Ты ушла, но песня осталась","Во мне ещё есть комната твоей формы"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Сегодня мы танцуем, сегодня мы поём","Печаль оставим у двери"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Я не остановлюсь, я не согнусь","Что моё — найду здесь"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Если бы эта ночь не кончалась","Я бы взял твою руку и не отпускал"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Я в порядке, не спрашивай дважды","Мои глаза меня выдают"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Каждое падение — скрытая взлётная полоса","В каждой тьме есть утро"]}]},"Japanese":{"script":"jp","titles":["{t}","{t}の歌||{t} no uta","君なしで||kimi nashi de","もう一つの夜||mou hitotsu no yoru","半分の歌||hanbun no uta"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["窓に雨、君の名前を書く||mado ni ame, kimi no namae o kaku","一粒ごとに言えなかった言葉||hitotsubu goto ni ienakatta kotoba"]},{"i":1,"fn":"o","moods":["nos"],"lines":["同じ通り、同じ店||onaji toori, onaji mise","君の笑い声はまだドアにいる||kimi no waraigoe wa mada doa ni iru"]},{"i":2,"fn":"o","moods":["mel"],"lines":["空の部屋に一つの灯り||kara no heya ni hitotsu no akari","暗闇が君の側を守っている||kurayami ga kimi no soba o mamotte iru"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["朝は見たことのない色で来た||asa wa mita koto no nai iro de kita","通り中が音を外して歌う||toori juu ga oto o hazushite utau"]},{"i":4,"fn":"v","moods":["rom"],"lines":["君なしで半分の笑顔||kimi nashi de hanbun no egao","残りは電話のそばで待っている||nokori wa denwa no soba de matte iru"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["この{t}が頭に、この{t}が繰り返す||kono {t} ga atama ni, kono {t} ga kurikaesu","すべてが少しずれて聞こえる||subete ga sukoshi zurete kikoeru"]},{"i":6,"fn":"v","moods":["hea"],"lines":["君が去って部屋が止まった||kimi ga satte heya ga tomatta","君が名前を置いた場所にまだ立っている||kimi ga namae o oita basho ni mada tatte iru"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["家の鏡を全部割った||ie no kagami o zenbu watta","君の顔ばかり映すから||kimi no kao bakari utsusu kara"]},{"i":8,"fn":"v","moods":["nos"],"lines":["あの屋上、あの八月の雨||ano okujou, ano hachigatsu no ame","帰り道を忘れていた||kaerimichi o wasurete ita"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["台所に友だち、壁に太鼓||daidokoro ni tomodachi, kabe ni taiko","音が止むまで誰も帰らない||oto ga yamu made dare mo kaeranai"]},{"i":10,"fn":"v","moods":["mot"],"lines":["落ちることも飛ぶ一つの形||ochiru koto mo tobu hitotsu no katachi","前にも落ちた、登り方は知っている||mae ni mo ochita, noborikata wa shitte iru"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["ゆっくりした風、閉じた目、開いた空||yukkuri shita kaze, tojita me, aita sora","何も遅れてない、何も僕のものでない||nanimo okuretenai, nanimo boku no mono de nai"]},{"i":12,"fn":"c","moods":["rom"],"lines":["君の名前が唇のメロディ||kimi no namae ga kuchibiru no merodi","どこへ行っても歌う||doko e itte mo utau"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["来て、来て、夜がまだ呼ぶ||kite, kite, yoru ga mada yobu","君なしで心は大きすぎる||kimi nashi de kokoro wa ookisugiru"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["君は去った、歌は残った||kimi wa satta, uta wa nokotta","心にまだ君の形の部屋がある||kokoro ni mada kimi no katachi no heya ga aru"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["今夜は踊る、今夜は歌う||konya wa odoru, konya wa utau","悲しみはドアに置いていく||kanashimi wa doa ni oite iku"]},{"i":16,"fn":"c","moods":["mot"],"lines":["止まらない、曲がらない||tomaranai, magaranai","僕のものはここで見つける||boku no mono wa koko de mitsukeru"]},{"i":17,"fn":"b","moods":["rom"],"lines":["この夜が終わらなければ||kono yoru ga owaranakereba","君の手を取って走らせる||kimi no te o totte hashiraseru"]},{"i":18,"fn":"b","moods":["hea"],"lines":["大丈夫、二度聞かないで||daijoubu, nido kikanaide","目が全部ばらしている||me ga zenbu barashite iru"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["すべての落下は偽装した滑走路||subete no rakka wa gisou shita kassouro","すべての闇に朝がある||subete no yami ni asa ga aru"]}]},"Korean":{"script":"jp","titles":["{t}","{t}의 노래||{t}ui norae","너 없이||neo eopsi","한 번 더 밤||han beon deo bam","반쪽 노래||banjjok norae"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["창문에 비, 네 이름을 써||changmune bi, ne ireumeul sseo","한 방울마다 하지 못한 말||han bangulmada haji mothan mal"]},{"i":1,"fn":"o","moods":["nos"],"lines":["같은 거리, 같은 가게||gateun geori, gateun gage","네 웃음은 아직 문에 살아||ne useumeun ajik mune sara"]},{"i":2,"fn":"o","moods":["mel"],"lines":["빈 방에 등 하나||bin bang'e deung hana","어둠이 네 자리를 지켜||eodumi ne jarireul jikyeo"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["아침이 처음 보는 색으로 왔어||achimi cheoeum boneun saegeuro wasseo","온 거리가 음정을 놓고 노래해||on georiga eumjeongeul noko noraehae"]},{"i":4,"fn":"v","moods":["rom"],"lines":["너 없이 반쪽 미소||neo eopsi banjjok miso","나머지 반은 전화 옆에서 기다려||nameoji baneun jeonhwa yeopeseo gidaryeo"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["이 {t}가 머리에, 이 {t}가 반복돼||i {t}ga meorie, i {t}ga banbokdwae","모든 게 조금 어긋나 들려||modeun ge jogeum eogeutna deullyeo"]},{"i":6,"fn":"v","moods":["hea"],"lines":["네가 떠나고 방이 멈췄어||nega tteonago bangi meomchwosseo","네가 내 이름을 둔 자리에 아직 서 있어||nega nae ireumeul dun jarie ajik seo isseo"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["집 안의 거울을 다 깼어||jip anui geoureul da kkaesseo","자꾸 네 얼굴만 비춰서||jakku ne eolgulman bichwoseo"]},{"i":8,"fn":"v","moods":["nos"],"lines":["그 옥상, 그 팔월의 비||geu oksang, geu parwolui bi","집에 가는 길을 잊었어||jibe ganeun gireul ijeosseo"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["부엌에 친구들, 벽에 북소리||bueoke chingudeul, byeoge buksori","소리가 멈추기 전엔 아무도 안 가||soriga meomchugi jeonen amudo an ga"]},{"i":10,"fn":"v","moods":["mot"],"lines":["떨어지는 것도 나는 방법||tteoreojineun geotdo naneun bangbeop","전에도 떨어졌어, 오르는 법을 알아||jeonedo tteoreojyeosseo, oreuneun beobeul ara"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["느린 바람, 감은 눈, 열린 하늘||neurin baram, gameun nun, yeollin haneul","아무것도 늦지 않아, 아무것도 내 것이 아니야||amugeotdo neutji ana, amugeotdo nae geosi aniya"]},{"i":12,"fn":"c","moods":["rom"],"lines":["네 이름이 입술의 멜로디||ne ireumi ipsurui mellodi","어디를 가도 그걸 불러||eodireul gado geugeol bulleo"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["와, 와, 밤이 아직 불러||wa, wa, bami ajik bulleo","너 없이 심장이 너무 커||neo eopsi simjangi neomu keo"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["너는 갔지만 노래는 남았어||neoneun gatjiman noraeneun namasseo","마음에 아직 네 모양의 방이 있어||maeume ajik ne moyangui bangi isseo"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["오늘 밤 춤, 오늘 밤 노래||oneul bam chum, oneul bam norae","슬픔은 문 앞에 두고 가||seulpeumeun mun ape dugo ga"]},{"i":16,"fn":"c","moods":["mot"],"lines":["멈추지 않아, 굽히지 않아||meomchuji ana, gupiji ana","내 것은 여기서 찾을 거야||nae geoseun yeogiseo chajeul geoya"]},{"i":17,"fn":"b","moods":["rom"],"lines":["이 밤이 끝나지 않는다면||i bami kkeutnaji anneundamyeon","네 손을 잡고 달리게 할 텐데||ne soneul japgo dallige hal tende"]},{"i":18,"fn":"b","moods":["hea"],"lines":["괜찮아, 두 번 묻지 마||gwaenchana, du beon mutji ma","눈이 다 말해 버려||nuni da malhae beoryeo"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["모든 추락은 위장한 활주로||modeun churageun wijanghan hwaljuro","모든 어둠에 아침이 있어||modeun eodume achimi isseo"]}]},"Chinese":{"script":"jp","titles":["{t}","{t}之歌||{t} zhi ge","没有你||méiyǒu nǐ","再多一个夜晚||zài duō yī gè yèwǎn","半首歌||bàn shǒu gē"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["雨在窗上写着你的名字||yǔ zài chuāng shàng xiězhe nǐ de míngzi","每一滴都是我没说出口的话||měi yī dī dōu shì wǒ méi shuō chūkǒu de huà"]},{"i":1,"fn":"o","moods":["nos"],"lines":["同一条街，同一家小店||tóng yī tiáo jiē, tóng yī jiā xiǎodiàn","你的笑声还住在门口||nǐ de xiàoshēng hái zhù zài ménkǒu"]},{"i":2,"fn":"o","moods":["mel"],"lines":["空房间里亮着一盏灯||kōng fángjiān lǐ liàngzhe yī zhǎn dēng","黑暗守着你那半边床||hēi'àn shǒuzhe nǐ nà bànbiān chuáng"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["早晨带着我没见过的颜色来了||zǎochén dàizhe wǒ méi jiànguò de yánsè láile","整条街都跑调地唱着||zhěng tiáo jiē dōu pǎodiào de chàngzhe"]},{"i":4,"fn":"v","moods":["rom"],"lines":["没有你只剩半个微笑||méiyǒu nǐ zhǐ shèng bàn gè wēixiào","另一半在电话旁等着||lìng yībàn zài diànhuà páng děngzhe"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["这个{t}在脑海里，这个{t}循环||zhège {t} zài nǎohǎi lǐ, zhège {t} xúnhuán","一切都听起来有点走音||yīqiè dōu tīng qǐlái yǒudiǎn zǒuyīn"]},{"i":6,"fn":"v","moods":["hea"],"lines":["你走了，房间停住了||nǐ zǒule, fángjiān tíng zhùle","我还站在你放下我名字的地方||wǒ hái zhàn zài nǐ fàngxià wǒ míngzi de dìfāng"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["我打碎了家里所有的镜子||wǒ dǎsuìle jiālǐ suǒyǒu de jìngzi","因为它们总是映出你的脸||yīnwèi tāmen zǒngshì yìng chū nǐ de liǎn"]},{"i":8,"fn":"v","moods":["nos"],"lines":["那个屋顶，那场八月的雨||nàge wūdǐng, nà chǎng bāyuè de yǔ","我们忘了回家的路||wǒmen wàngle huíjiā de lù"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["厨房里有朋友，墙上有鼓声||chúfáng lǐ yǒu péngyǒu, qiáng shàng yǒu gǔ shēng","声音不停谁都不走||shēngyīn bù tíng shéi dōu bù zǒu"]},{"i":10,"fn":"v","moods":["mot"],"lines":["坠落也是飞行的一种||zhuìluò yě shì fēixíng de yī zhǒng","我也曾掉下去，我知道怎么爬||wǒ yě céng diào xiàqù, wǒ zhīdào zěnme pá"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["风很慢，眼睛闭着，天空敞开||fēng hěn màn, yǎnjing bìzhe, tiānkōng chǎngkāi","什么都不晚，什么都不属于我||shénme dōu bù wǎn, shénme dōu bù shǔyú wǒ"]},{"i":12,"fn":"c","moods":["rom"],"lines":["你的名字是我唇边的旋律||nǐ de míngzi shì wǒ chún biān de xuánlǜ","走到哪里我都唱它||zǒu dào nǎlǐ wǒ dōu chàng tā"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["来吧，来吧，夜晚还在呼唤||láiba, láiba, yèwǎn hái zài hūhuàn","没有你我的心太响了||méiyǒu nǐ wǒ de xīn tài xiǎngle"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["你走了，歌却留了下来||nǐ zǒule, gē què liúle xiàlái","心里还有一个你形状的房间||xīnlǐ hái yǒu yī gè nǐ xíngzhuàng de fángjiān"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["今晚跳舞，今晚歌唱||jīnwǎn tiàowǔ, jīnwǎn gēchàng","把难过留在门口||bǎ nánguò liú zài ménkǒu"]},{"i":16,"fn":"c","moods":["mot"],"lines":["我不停下，我不弯腰||wǒ bù tíngxià, wǒ bù wānyāo","属于我的会在这里找到||shǔyú wǒ de huì zài zhèlǐ zhǎodào"]},{"i":17,"fn":"b","moods":["rom"],"lines":["如果这一夜永不结束||rúguǒ zhè yī yè yǒng bù jiéshù","我会握着你的手让它继续||wǒ huì wòzhe nǐ de shǒu ràng tā jìxù"]},{"i":18,"fn":"b","moods":["hea"],"lines":["我没事，别问两次||wǒ méishì, bié wèn liǎng cì","我的眼睛把一切说了出去||wǒ de yǎnjing bǎ yīqiè shuōle chūqù"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["每次坠落都是伪装的跑道||měi cì zhuìluò dōu shì wěizhuāng de pǎodào","每片黑暗里都有一个早晨||měi piàn hēi'àn lǐ dōu yǒu yī gè zǎochén"]}]},"Indonesian":{"script":"latin","titles":["{t}","{t} di suaraku","Tanpamu","Satu Malam Lagi","Setengah Lagu"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Hujan di jendela menulis namamu","Setiap tetes kata yang tak kuucapkan"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Jalan yang sama, warung yang sama","Tawamu masih tinggal di pintu"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Satu lampu menyala di kamar kosong","Gelap menjaga sisimu di ranjang"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Matahari terbit dengan warna yang belum pernah kulihat","Seluruh jalan bernyanyi sumbang"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Setengah senyum hanya itu tanpamu","Setengahnya menunggu di dekat telepon"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} di kepalaku, {t} berulang","Semuanya terdengar sedikit sumbang"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Kau pergi dan kamar ini berhenti","Aku masih berdiri di tempat namaku kau jatuhkan"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Kupatahkan semua cermin di rumah","Karena selalu menunjukkan wajahmu"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Atap itu, hujan Agustus itu","Kita lupa jalan pulang"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Teman di dapur, drum di dinding","Tak ada yang pulang sebelum speaker mati"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Jatuh hanya cara lain untuk terbang","Aku pernah di bawah, aku tahu pendakiannya"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Angin pelan, mata tertutup, langit terbuka","Tak ada yang terlambat, tak ada yang milikku"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Namamu melodi di bibirku","Kunyanyikan ke mana pun aku pergi"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Datang, datang, malam masih memanggil","Tanpamu jantungku terlalu keras"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Kau pergi tapi lagunya tinggal","Masih ada kamar berbentuk kamu di dalamku"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Malam ini menari, malam ini bernyanyi","Tinggalkan sedih di pintu"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Aku tak berhenti, aku tak menekuk","Yang milikku akan kutemukan di sini"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Jika malam ini tak pernah berakhir","Kan kupegang tanganmu dan kubiar berlari"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Aku baik-baik saja, jangan tanya dua kali","Mataku membocorkan semuanya"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Setiap jatuh adalah landasan menyamar","Setiap gelap menyimpan pagi"]}]},"Swahili":{"script":"latin","titles":["{t}","{t} kwa sauti yangu","Bila Huna Wewe","Usiku Mmoja Zaidi","Nusu ya Wimbo"],"blocks":[{"i":0,"fn":"o","moods":["rom"],"lines":["Mvua dirishani inaandika jina lako","Kila tone ni neno nililoshindwa kusema"]},{"i":1,"fn":"o","moods":["nos"],"lines":["Mtaa ule ule, duka lile lile","Kicheko chako bado kinaishi mlangoni"]},{"i":2,"fn":"o","moods":["mel"],"lines":["Taa moja inawaka katika chumba kitupu","Giza linashika upande wako wa kitanda"]},{"i":3,"fn":"o","moods":["joy","mot"],"lines":["Jua limepambazuka na rangi nisiyoijua","Mtaa wote unaimba kwa kupotoka"]},{"i":4,"fn":"v","moods":["rom"],"lines":["Nusu ya tabasamu ni yote nilionayo bila wewe","Nusu nyingine inasubiri kando ya simu"]},{"i":5,"fn":"v","moods":["rom","nos"],"lines":["{t} kichwani, {t} mara kwa mara","Kila kitu kinasikika kama kimepotoka"]},{"i":6,"fn":"v","moods":["hea"],"lines":["Umeondoka na chumba kimesimama","Bado nimesimama mahali ulipoliacha jina langu"]},{"i":7,"fn":"v","moods":["hea","mel"],"lines":["Nilivunja vioo vyote nyumbani","Kwa sababu vilikuwa vinaonyesha uso wako"]},{"i":8,"fn":"v","moods":["nos"],"lines":["Paa lile, mvua ile ya Agosti","Tulisahau njia ya kurudi nyumbani"]},{"i":9,"fn":"v","moods":["joy","ene"],"lines":["Marafiki jikoni, ngoma ukutani","Hakuna anayeondoka kabla sauti haijafa"]},{"i":10,"fn":"v","moods":["mot"],"lines":["Kuanguka ni njia nyingine ya kuruka","Nilishuka zamani, najua kupanda"]},{"i":11,"fn":"v","moods":["pea","spi"],"lines":["Upepo wa polepole, macho yafungwa, anga wazi","Hakuna kilichochelewa, hakuna kilicho changu"]},{"i":12,"fn":"c","moods":["rom"],"lines":["Jina lako ni wimbo midomoni mwangu","Naimba kokote niendako"]},{"i":13,"fn":"c","moods":["rom","ene"],"lines":["Njoo, njoo, usiku unaita bado","Bila wewe moyo wangu unasikika sana"]},{"i":14,"fn":"c","moods":["hea","mel"],"lines":["Umeondoka lakini wimbo umebaki","Bado kuna chumba cha umbo lako ndani yangu"]},{"i":15,"fn":"c","moods":["joy","fun"],"lines":["Leo tunacheza, leo tunaimba","Tuachie huzuni mlangoni"]},{"i":16,"fn":"c","moods":["mot"],"lines":["Sitaacha, sitainama","Kilicho changu nitakipata hapa"]},{"i":17,"fn":"b","moods":["rom"],"lines":["Kama usiku huu hautaisha kamwe","Ningeshika mkono wako na kuuacha ukimbie"]},{"i":18,"fn":"b","moods":["hea"],"lines":["Niko sawa, usiniulize mara mbili","Macho yangu yananiaibisha"]},{"i":19,"fn":"b","moods":["mot","ene"],"lines":["Kila kuanguka ni uwanja wa ndege uliojificha","Kila giza lina asubuhi"]}]}};
+var LANG_LIST = ["Hindi", "English", "Hinglish", "Punjabi", "Urdu", "Bengali", "Marathi", "Gujarati", "Tamil", "Telugu", "Kannada", "Malayalam", "Odia", "Bhojpuri", "Nepali", "Spanish", "French", "German", "Portuguese", "Italian", "Arabic", "Turkish", "Russian", "Japanese", "Korean", "Chinese", "Indonesian", "Swahili"];
+</script>
+<script>/* Lyrics Studio engine — pure logic, no DOM. Depends on global DATA. */
+(function (root) {
+  "use strict";
+
+  var MOODCODE = { Romantic: "rom", Heartbreak: "hea", Joyful: "joy", Nostalgic: "nos", Motivational: "mot", Peaceful: "pea", Energetic: "ene", Melancholic: "mel", Funny: "fun", Spiritual: "spi" };
+  var GENRE_FLAVOR = { Bollywood: "rom", Pop: "joy", "Hip-hop": "ene", Rock: "ene", Ghazal: "mel", Sufi: "spi", Folk: "nos", Bhajan: "spi", EDM: "ene", "Lo-fi": "pea", "R&B": "rom", Country: "nos", Lullaby: "pea", Patriotic: "mot" };
+  var AFFINITY = { rom: ["nos", "joy"], hea: ["mel", "nos"], joy: ["ene", "fun", "rom"], nos: ["rom", "mel", "hea"], mot: ["ene", "joy"], pea: ["spi", "mel"], ene: ["joy", "mot", "fun"], mel: ["hea", "nos", "pea"], fun: ["joy", "ene"], spi: ["pea", "mot"] };
+  var STOP = "in on at of the a an my your our their to and or but me mein mai ka ki ke se par aur ho hi hai the is are was".split(" ");
+
+  /* ---------------- transliteration ---------------- */
+  function P(s) {
+    var o = {}, p = s.trim().split(/\s+/), i, q;
+    for (i = 0; i < p.length; i++) { q = p[i].split(":"); o[q[0]] = q.length > 1 ? q[1] : ""; }
+    return o;
+  }
+
+  var DEVA = {
+    ind: P("अ:a आ:aa इ:i ई:i उ:u ऊ:oo ऋ:ri ए:e ऐ:ai ओ:o औ:au ऍ:e"),
+    cons: P("क:k ख:kh ग:g घ:gh ङ:n च:ch छ:chh ज:j झ:jh ञ:n ट:t ठ:th ड:d ढ:dh ण:n त:t थ:th द:d ध:dh न:n प:p फ:ph ब:b भ:bh म:m य:y र:r ल:l व:v श:sh ष:sh स:s ह:h ळ:l ऱ:r क़:q ख़:kh ग़:gh ज़:z ड़:r ढ़:rh फ़:f"),
+    matra: P("ा:aa ि:i ी:i ु:u ू:oo ृ:ri े:e ै:ai ो:o ौ:au ॉ:o ॅ:e"),
+    virama: "्",
+    marks: P("ं:n ँ:n ः:h ॒: ॑:")
+  };
+  var GURU = {
+    ind: P("ਅ:a ਆ:aa ਇ:i ਈ:i ਉ:u ਊ:oo ਏ:e ਐ:ai ਓ:o ਔ:au"),
+    cons: P("ਕ:k ਖ:kh ਗ:g ਘ:gh ਙ:n ਚ:ch ਛ:chh ਜ:j ਝ:jh ਞ:n ਟ:t ਠ:th ਡ:d ਢ:dh ਣ:n ਤ:t ਥ:th ਦ:d ਧ:dh ਨ:n ਪ:p ਫ:ph ਬ:b ਭ:bh ਮ:m ਯ:y ਰ:r ਲ:l ਵ:v ਸ਼:sh ਸ:s ਹ:h ਲ਼:l ਸ਼:sh ਖ਼:kh ਗ਼:g ਜ਼:z ਫ਼:f ਲ਼:l"),
+    matra: P("ਾ:aa ਿ:i ੀ:i ੁ:u ੂ:oo ੇ:e ੈ:ai ੋ:o ੌ:au"),
+    virama: "੍",
+    marks: P("ੰ:n ਂ:n ਃ:h ੱ: ਖ਼:kh ਗ਼:g ਜ਼:z ੜ:r ਫ਼:f")
+  };
+  var BENG = {
+    ind: P("অ:o আ:a ই:i ঈ:i উ:u ঊ:oo এ:e ঐ:oi ও:o ঔ:ou"),
+    cons: P("ক:k খ:kh গ:g ঘ:gh ঙ:ng চ:ch ছ:chh জ:j ঝ:jh ঞ:n ট:t ঠ:th ড:d ঢ:dh ণ:n ত:t থ:th দ:d ধ:dh ন:n প:p ফ:ph ব:b ভ:bh ম:m য:j র:r ল:l শ:sh ষ:sh স:s হ:h ৎ:t"),
+    matra: P("া:a ি:i ী:i ু:u ূ:oo ৃ:ri ে:e ৈ:oi ো:o ৌ:ou"),
+    virama: "্",
+    marks: P("ং:ng ঁ:n ঃ:h ়: ড়:r ঢ়:rh য়:y")
+  };
+  var GUJR = {
+    ind: P("અ:a આ:aa ઇ:i ઈ:i ઉ:u ઊ:oo એ:e ઐ:ai ઓ:o ઔ:au"),
+    cons: P("ક:k ખ:kh ગ:g ઘ:gh ઙ:n ચ:ch છ:chh જ:j ઝ:jh ઞ:n ટ:t ઠ:th ડ:d ઢ:dh ણ:n ત:t થ:th દ:d ધ:dh ન:n પ:p ફ:ph બ:b ભ:bh મ:m ય:y ર:r લ:l વ:v શ:sh ષ:sh સ:s હ:h ળ:l"),
+    matra: P("ા:aa િ:i ી:i ુ:u ૂ:oo ૃ:ri ે:e ૈ:ai ો:o ૌ:au"),
+    virama: "્",
+    marks: P("ં:n ઁ:n ઃ:h")
+  };
+  var ORIYA = {
+    ind: P("ଅ:a ଆ:aa ଇ:i ଈ:i ଉ:u ଊ:oo ଏ:e ଐ:ai ଓ:o ଔ:au"),
+    cons: P("କ:k ଖ:kh ଗ:g ଘ:gh ଙ:n ଚ:ch ଛ:chh ଜ:j ଝ:jh ଞ:n ଟ:t ଠ:th ଡ:d ଢ:dh ଣ:n ତ:t ଥ:th ଦ:d ଧ:dh ନ:n ପ:p ଫ:ph ବ:b ଭ:bh ମ:m ଯ:j ର:r ଲ:l ଵ:v ଶ:sh ଷ:sh ସ:s ହ:h ଳ:l ୟ:y"),
+    matra: P("ା:aa ି:i ୀ:i ୁ:u ୂ:oo ୃ:ri େ:e ୈ:ai ୋ:o ୌ:au"),
+    virama: "୍",
+    marks: P("ଂ:n ଁ:n ଃ:h")
+  };
+  var TAMIL = {
+    ind: P("அ:a ஆ:aa இ:i ஈ:i உ:u ஊ:oo எ:e ஏ:e ஐ:ai ஒ:o ஓ:o ஔ:au"),
+    cons: P("க:k ங:ng ச:ch ஜ:j ஞ:n ட:t ண:n த:th ந:n ப:p ம:m ய:y ர:r ல:l வ:v ழ:zh ள:l ற:r ன:n ஸ:s ஷ:sh ஹ:h"),
+    matra: P("ா:aa ி:i ீ:i ு:u ூ:oo ெ:e ே:e ை:ai ொ:o ோ:o ௌ:au"),
+    virama: "்",
+    marks: P("ஂ:m ஃ:h")
+  };
+  var TELU = {
+    ind: P("అ:a ఆ:aa ఇ:i ఈ:i ఉ:u ఊ:oo ఋ:ri ఎ:e ఏ:e ఐ:ai ఒ:o ఓ:o ఔ:au"),
+    cons: P("క:k ఖ:kh గ:g ఘ:gh ఙ:n చ:ch ఛ:chh జ:j ఝ:jh ఞ:n ట:t ఠ:th డ:d ఢ:dh ణ:n త:t థ:th ద:d ధ:dh న:n ప:p ఫ:ph బ:b భ:bh మ:m య:y ర:r ల:l వ:v శ:sh ష:sh స:s హ:h ళ:l"),
+    matra: P("ా:aa ి:i ీ:i ు:u ూ:oo ృ:ri ె:e ే:e ై:ai ొ:o ో:o ౌ:au"),
+    virama: "్",
+    marks: P("ం:n ఁ:n ః:h")
+  };
+  var KANN = {
+    ind: P("ಅ:a ಆ:aa ಇ:i ಈ:i ಉ:u ಊ:oo ಋ:ri ಎ:e ಏ:e ಐ:ai ಒ:o ಓ:o ಔ:au"),
+    cons: P("ಕ:k ಖ:kh ಗ:g ಘ:gh ಙ:n ಚ:ch ಛ:chh ಜ:j ಝ:jh ಞ:n ಟ:t ಠ:th ಡ:d ಢ:dh ಣ:n ತ:t ಥ:th ದ:d ಧ:dh ನ:n ಪ:p ಫ:ph ಬ:b ಭ:bh ಮ:m ಯ:y ರ:r ಲ:l ವ:v ಶ:sh ಷ:sh ಸ:s ಹ:h ಳ:l"),
+    matra: P("ಾ:aa ಿ:i ೀ:i ು:u ೂ:oo ೃ:ri ೆ:e ೇ:e ೈ:ai ೊ:o ೋ:o ೌ:au"),
+    virama: "್",
+    marks: P("ಂ:n ಁ:n ಃ:h")
+  };
+  var MLYM = {
+    ind: P("അ:a ആ:aa ഇ:i ഈ:i ഉ:u ഊ:oo ഋ:ri എ:e ഏ:e ഐ:ai ഒ:o ഓ:o ഔ:au"),
+    cons: P("ക:k ഖ:kh ഗ:g ഘ:gh ങ:n ച:ch ഛ:chh ജ:j ഝ:jh ഞ:n ട:t ഠ:th ഡ:d ഢ:dh ണ:n ത:t ഥ:th ദ:d ധ:dh ന:n പ:p ഫ:ph ബ:b ഭ:bh മ:m യ:y ര:r ല:l വ:v ശ:sh ഷ:sh സ:s ഹ:h ള:l ഴ:zh റ:r"),
+    matra: P("ാ:aa ി:i ീ:i ു:u ൂ:oo ൃ:ri െ:e േ:e ൈ:ai ൊ:o ോ:o ൌ:au"),
+    virama: "്",
+    marks: P("ം:n ഁ:n ഃ:h ൻ:n ർ:r ൽ:l ൾ:l ൺ:n")
+  };
+  var ARAB = P("ا:a آ:aa أ:a إ:i ب:b پ:p ت:t ٹ:t ث:s ج:j چ:ch ح:h خ:kh د:d ڈ:d ذ:z ر:r ڑ:r ز:z ژ:zh س:s ش:sh ص:s ض:z ط:t ظ:z ع:a غ:gh ف:f ق:q ک:k گ:g ل:l م:m ن:n ں:n و:o ہ:h ھ:h ۂ:h ء: ی:i ي:i ے:e ئ:y ؤ:o ة:h ۃ:h َ:a ِ:i ُ:u ً:a ٍ: ّ: ْ: ٰ:aa ـ:٪:%");
+  var CYRL = P("а:a б:b в:v г:g д:d е:e ё:yo ж:zh з:z и:i й:y к:k л:l м:m н:n о:o п:p р:r с:s т:t у:u ф:f х:kh ц:ts ч:ch ш:sh щ:shch ъ: ы:y ь: э:e ю:yu я:ya А:A Б:B В:V Г:G Д:D Е:E Ё:Yo Ж:Zh З:Z И:I Й:Y К:K Л:L М:M Н:N О:O П:P Р:R С:S Т:T У:U Ф:F Х:Kh Ц:Ts Ч:Ch Ш:Sh Щ:Shch Ъ: Ы:Y Ь: Э:E Ю:Yu Я:Ya");
+
+  var SCRIPT = { deva: DEVA, guru: GURU, beng: BENG, gujr: GUJR, oriya: ORIYA, tamil: TAMIL, telu: TELU, kann: KANN, mlym: MLYM };
+
+  function trAbugida(text, t) {
+    var out = "", i = 0, n = text.length, ch, nx;
+    while (i < n) {
+      ch = text.charAt(i);
+      var pair = text.substr(i, 2);
+      if (pair.length === 2 && t.cons[pair] !== undefined) ch = pair;
+      if (t.cons[ch] !== undefined) {
+        var clen = ch.length;
+        out += t.cons[ch];
+        nx = text.charAt(i + clen);
+        if (nx && t.matra[nx] !== undefined) { out += t.matra[nx]; i += clen + 1; continue; }
+        if (nx === t.virama) { i += clen + 1; continue; }
+        // inherent vowel: dropped word-finally (schwa deletion), kept before another letter
+        var isLetter = nx && (t.cons[nx] !== undefined || t.ind[nx] !== undefined ||
+          t.matra[nx] !== undefined || t.marks[nx] !== undefined);
+        if (isLetter) out += "a";
+        i += clen; continue;
+      }
+      if (ch === "ੱ") {                       // Gurmukhi addak: geminates the next consonant
+        var gc = text.charAt(i + 1);
+        if (t.cons[gc] !== undefined) out += t.cons[gc];
+        i++; continue;
+      }
+      if (t.ind[ch] !== undefined) { out += t.ind[ch]; i++; continue; }
+      if (t.matra[ch] !== undefined) { out += t.matra[ch]; i++; continue; }
+      if (t.marks[ch] !== undefined) { out += t.marks[ch]; i++; continue; }
+      if (ch === t.virama) { i++; continue; }
+      if (ch === "़" || ch === "਼" || ch === "઼" || ch === "଼") { i++; continue; }
+      out += ch; i++;
+    }
+    return out.replace(/\s+/g, " ");
+  }
+
+  function trSimple(text, map) {
+    var out = "", i, ch;
+    for (i = 0; i < text.length; i++) { ch = text.charAt(i); out += map[ch] !== undefined ? map[ch] : ch; }
+    return out.replace(/\s+/g, " ");
+  }
+
+  // Arabic/Urdu script writes no short vowels: use word position to guess long vowels
+  function trArabic(text) {
+    var out = "", i, ch, m, prev = false;
+    for (i = 0; i < text.length; i++) {
+      ch = text.charAt(i);
+      if (ch === " " || ch === "،" || ch === "؟" || ch === "۔") { out += ch === " " ? " " : ch; prev = false; continue; }
+      m = ARAB[ch];
+      if (m === undefined) { out += ch; prev = false; continue; }
+      if (!prev && (ch === "ی" || ch === "ي")) m = "y";
+      else if (ch === "ا") m = prev ? "aa" : "a";
+      else if (!prev && ch === "و") m = "o";
+      out += m;
+      prev = m !== "";
+    }
+    return out.replace(/\s+/g, " ");
+  }
+
+  function romanize(text, script) {
+    if (SCRIPT[script]) return trAbugida(text, SCRIPT[script]);
+    if (script === "arab") return trArabic(text);
+    if (script === "cyrl") return trSimple(text, CYRL);
+    return text;
+  }
+
+  function detectScript(t) {
+    if (/[\u0900-\u097F]/.test(t)) return "deva";
+    if (/[\u0A00-\u0A7F]/.test(t)) return "guru";
+    if (/[\u0980-\u09FF]/.test(t)) return "beng";
+    if (/[\u0A80-\u0AFF]/.test(t)) return "gujr";
+    if (/[\u0B00-\u0B7F]/.test(t)) return "oriya";
+    if (/[\u0B80-\u0BFF]/.test(t)) return "tamil";
+    if (/[\u0C00-\u0C7F]/.test(t)) return "telu";
+    if (/[\u0C80-\u0CFF]/.test(t)) return "kann";
+    if (/[\u0D00-\u0D7F]/.test(t)) return "mlym";
+    if (/[\u0600-\u06FF]/.test(t)) return "arab";
+    if (/[\u0400-\u04FF]/.test(t)) return "cyrl";
+    if (/[\u3040-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF]/.test(t)) return "jp";
+    return "latin";
+  }
+
+  function renderLine(raw, script, mode, subs) {
+    var parts = String(raw).split("||");
+    var native = parts[0], roman = parts[1] || null;
+    var isRoman = mode === "roman";
+    var out = isRoman ? (roman || romanize(native, script)) : native;
+    if (subs) out = out.split("{t}").join(isRoman ? subs.roman : subs.native);
+    return out;
+  }
+
+  /* ---------------- topic keyword ---------------- */
+  function keyword(topic) {
+    var words = String(topic).replace(/[.,!?;:।॥…"'“”‘’()\[\]]/g, " ").trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return "";
+    var k = words.length;
+    while (k > 1 && STOP.indexOf(words[k - 1].toLowerCase()) >= 0) k--;
+    return words[k - 1];
+  }
+
+  function cleanTitle(topic) {
+    var t = String(topic).replace(/\s+/g, " ").trim().replace(/[.,;:।…!?"']+$/, "");
+    var w = t.split(" ").slice(0, 8).join(" ");
+    if (/^[a-z]/.test(w)) w = w.charAt(0).toUpperCase() + w.slice(1);
+    return w;
+  }
+
+  /* ---------------- selection ---------------- */
+  function hasSlot(b) { return b.lines.join(" ").indexOf("{t}") >= 0; }
+
+  function candidates(L, fn, allowTopic) {
+    var out = [], i, b;
+    for (i = 0; i < L.blocks.length; i++) {
+      b = L.blocks[i];
+      if (b.fn !== fn) continue;
+      if (!allowTopic && hasSlot(b)) continue;
+      out.push(b);
+    }
+    return out;
+  }
+
+  function score(b, mood, flavor, used) {
+    var s = Math.random() * 1.2;
+    if (used[b.i]) s -= 9 * used[b.i];
+    if (b.moods.indexOf(mood) >= 0) s += 2.4;
+    else {
+      var aff = AFFINITY[mood] || [];
+      for (var q = 0; q < b.moods.length; q++) { if (aff.indexOf(b.moods[q]) >= 0) { s += 1.4; break; } }
+    }
+    if (flavor && b.moods.indexOf(flavor) >= 0) s += 1.1;
+    if (!b.moods.length) s += 0.35;
+    return s;
+  }
+
+  function pick(L, fn, n, mood, flavor, allowTopic, used, strictMood) {
+    var list = candidates(L, fn, allowTopic);
+    if (strictMood) {
+      var matched = list.filter(function (b) { return b.moods.indexOf(mood) >= 0; });
+      if (matched.length) list = matched;
+    }
+    if (!list.length) return [];
+    var scored = list.map(function (b) { return { b: b, s: score(b, mood, flavor, used) }; });
+    scored.sort(function (x, y) { return y.s - x.s; });
+    var out = [];
+    for (var i = 0; i < scored.length && out.length < n; i++) out.push(scored[i].b);
+    for (var j = 0; j < out.length; j++) used[out[j].i] = (used[out[j].i] || 0) + 1;
+    return out;
+  }
+
+  function fill(blocks) {
+    var lines = [];
+    for (var i = 0; i < blocks.length; i++) {
+      for (var j = 0; j < blocks[i].lines.length; j++) lines.push(blocks[i].lines[j]);
+    }
+    return lines;
+  }
+
+  /* ---------------- main build ---------------- */
+  function blockScore(b, mood, flavor) {
+    var s = 0, q, aff;
+    if (b.moods.indexOf(mood) >= 0) s += 2.4;
+    else {
+      aff = AFFINITY[mood] || [];
+      for (q = 0; q < b.moods.length; q++) { if (aff.indexOf(b.moods[q]) >= 0) { s += 1.4; break; } }
+    }
+    if (flavor && b.moods.indexOf(flavor) >= 0) s += 1.1;
+    if (!b.moods.length) s += 0.35;
+    return s;
+  }
+
+  /* Compose a section line by line out of every block of that function.
+     Pairs from one block are preferred so couplets still rhyme, but lines
+     are recombined across blocks, so the same song almost never comes back. */
+  function composeLines(L, fn, count, mood, flavor, allowTopic, usedLines, songTaken) {
+    var pool = [], strictSet = {}, i, j, b, aff, k, hit;
+    aff = AFFINITY[mood] || [];
+    for (i = 0; i < L.blocks.length; i++) {
+      b = L.blocks[i];
+      if (b.fn !== fn) continue;
+      if (!allowTopic && hasSlot(b)) continue;
+      pool.push(b);
+      hit = b.moods.indexOf(mood) >= 0;
+      for (k = 0; k < b.moods.length && !hit; k++) if (aff.indexOf(b.moods[k]) >= 0) hit = true;
+      if (hit || !b.moods.length) strictSet[b.i] = 1;
+    }
+    if (!pool.length) return [];
+
+    var ranked = [], s, u;
+    for (i = 0; i < pool.length; i++) {
+      b = pool[i];
+      u = 0;
+      for (j = 0; j < b.lines.length; j++) u += (usedLines[b.i + ":" + j] || 0);
+      // on-mood lines always win on a fresh start; once they are worn out the
+      // rest of the language's material comes in, so nothing repeats forever
+      s = blockScore(b, mood, flavor) + (strictSet[b.i] ? 4 : 0) + Math.random() * 1.7 - u * 1.9;
+      ranked.push({ b: b, s: s });
+    }
+    ranked.sort(function (x, y) { return y.s - x.s; });
+
+    var out = [], taken = {}, guard = 0;
+    function take(bb, jj) {
+      out.push(bb.lines[jj]);
+      taken[bb.i + ":" + jj] = 1;
+      if (songTaken) songTaken[bb.lines[jj]] = 1;
+      usedLines[bb.i + ":" + jj] = (usedLines[bb.i + ":" + jj] || 0) + 1;
+    }
+    while (out.length < count && guard++ < 60) {
+      var took = false;
+      for (var r = 0; r < ranked.length && out.length < count; r++) {
+        var rb = ranked[r].b, free = [];
+        for (j = 0; j < rb.lines.length; j++) {
+          if (taken[rb.i + ":" + j]) continue;
+          if (songTaken && songTaken[rb.lines[j]]) continue;   // never the same line twice in one song
+          free.push(j);
+        }
+        if (!free.length) continue;
+        if (free.length >= 2 && out.length + 2 <= count && Math.random() < 0.66) {
+          take(rb, free[0]);
+          take(rb, free[1]);
+        } else {
+          // a single line should finish a couplet that already started, not orphan one
+          var done = null;
+          for (var r3 = 0; r3 < ranked.length; r3++) {
+            var b3 = ranked[r3].b, started = false, slot = -1;
+            for (j = 0; j < b3.lines.length; j++) {
+              if (taken[b3.i + ":" + j]) started = true;
+              else if (slot < 0 && !(songTaken && songTaken[b3.lines[j]])) slot = j;
+            }
+            if (started && slot >= 0) { done = { b: b3, j: slot }; break; }
+          }
+          if (done) take(done.b, done.j);
+          else take(rb, free[0]);
+        }
+        took = true;
+        break;
+      }
+      if (!took) break;
+    }
+    // top up from the highest ranked blocks if the pool was tiny
+    for (var r2 = 0; out.length < count && r2 < 40; r2++) {
+      var tb = ranked[r2 % ranked.length].b;
+      out.push(tb.lines[r2 % tb.lines.length]);
+    }
+    return out;
+  }
+
+  function buildLyrics(state) {
+    var L = DATA[state.lang];
+    if (!L) return "";
+    var mood = MOODCODE[state.mood] || "rom";
+    var flavor = GENRE_FLAVOR[state.genre] || "";
+    var topic = (state.topic || "").trim();
+    var tScript = topic ? detectScript(topic) : "";
+    var allowTopic = !!topic && L.script !== "jp" && tScript === L.script;
+    var kw = allowTopic ? keyword(topic) : "";
+    var subs = kw ? { native: kw, roman: romanize(kw, tScript) } : null;
+    var usedLines = state.usedLines || {};
+    var len = state.len | 0;
+
+    var songTaken = {};
+
+    function verse(n) {
+      var lines = [];
+      if (n === 1) lines = composeLines(L, "o", 2, mood, flavor, allowTopic, usedLines, songTaken);
+      lines = lines.concat(composeLines(L, "v", 4 + (Math.random() < 0.45 ? 1 : 0), mood, flavor, allowTopic, usedLines, songTaken));
+      return lines;
+    }
+
+    var chorus = composeLines(L, "c", 4, mood, flavor, allowTopic, usedLines, songTaken);
+    if (!chorus.length) chorus = composeLines(L, "v", 4, mood, flavor, allowTopic, usedLines, songTaken);
+
+    var sections = [{ label: "Verse 1", lines: verse(1) }];
+    if (len === 0) {
+      sections.push({ label: "Chorus", lines: chorus });
+    } else {
+      sections.push({ label: "Chorus", lines: chorus });
+      sections.push({ label: "Verse 2", lines: verse(2) });
+      sections.push({ label: "Chorus", lines: chorus });
+      if (len === 2) {
+        sections.push({ label: "Verse 3", lines: verse(3) });
+        sections.push({ label: "Chorus", lines: chorus });
+      }
+      var br = composeLines(L, "b", 2 + (Math.random() < 0.5 ? 1 : 0), mood, flavor, allowTopic, usedLines, songTaken);
+      if (br.length) sections.push({ label: "Bridge", lines: br });
+      sections.push({ label: "Chorus", lines: chorus });
+    }
+
+    var script = L.script;
+    var mode = state.script === "roman" ? "roman" : "native";
+
+    var title;
+    if (topic) title = cleanTitle(topic);
+    else {
+      var tpool = L.titles.filter(function (t) { return t.indexOf("{t}") < 0; });
+      title = tpool.length ? tpool[Math.floor(Math.random() * tpool.length)] : L.titles[0];
+    }
+    var tp = title.split("||");
+    if (mode === "roman") {
+      if (tp[1]) title = tp[1];
+      else {
+        var ttl = detectScript(tp[0]);
+        title = ttl === "latin" ? tp[0] : romanize(tp[0], ttl);
+      }
+    } else title = tp[0];
+
+    var out = [title];
+    for (var si = 0; si < sections.length; si++) {
+      out.push("");
+      out.push("[" + sections[si].label + "]");
+      for (var li = 0; li < sections[si].lines.length; li++) {
+        out.push(renderLine(sections[si].lines[li], script, mode, subs));
+      }
+    }
+    return out.join("\n");
+  }
+
+  function promptFor(state) {
+    var lens = ["Short (1 verse + chorus)", "Standard (2 verses + chorus + bridge)", "Long (3 verses + chorus + bridge)"];
+    var topic = (state.topic || "").trim() || "a heartfelt song of your choice";
+    return "Write original song lyrics.\n" +
+      "Topic: " + topic + "\n" +
+      "Language: " + state.lang + "\n" +
+      "Genre: " + state.genre + "\n" +
+      "Mood: " + state.mood + "\n" +
+      "Length: " + lens[state.len | 0] + "\n" +
+      (state.script === "roman" ? "Write in Roman letters (transliteration), not the native script." : "Write in the language's native script.") + "\n" +
+      "Rules: Catchy title on the first line, then sections labeled like [Verse 1], [Chorus], [Bridge] each on its own line. Natural rhyme and rhythm for the language and genre. Fully original; never reproduce existing songs. Output only title and lyrics, no markdown, no commentary.";
+  }
+
+  root.LyricsEngine = {
+    buildLyrics: buildLyrics,
+    promptFor: promptFor,
+    romanize: romanize,
+    renderLine: renderLine,
+    MOODCODE: MOODCODE,
+    GENRE_FLAVOR: GENRE_FLAVOR
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>/* Lyrics Studio UI */
+(function () {
+  "use strict";
+  var E = window.LyricsEngine;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var LANGS = window.LANG_LIST;
+  var GENRES = ["Bollywood", "Pop", "Hip-hop", "Rock", "Ghazal", "Sufi", "Folk", "Bhajan", "EDM", "Lo-fi", "R&B", "Country", "Lullaby", "Patriotic"];
+  var MOODS = ["Romantic", "Heartbreak", "Joyful", "Nostalgic", "Motivational", "Peaceful", "Energetic", "Melancholic", "Funny", "Spiritual"];
+  var LENS = [["Short", "1 verse + chorus"], ["Standard", "2 verses + chorus + bridge"], ["Long", "3 verses + chorus + bridge"]];
+  var SCR = [["Native script", "native"], ["Roman letters", "roman"]];
+
+  var S = { lang: "Hindi", genre: "Bollywood", mood: "Romantic", len: 1, script: "native" };
+  var usedMap = {}, last = "", busy = false;
+
+  // remembered lines, per language, so regenerating never repeats the same line
+  var lineMem = {};
+  try { lineMem = JSON.parse(localStorage.getItem("lyrics_linemem") || "{}") || {}; } catch (e) { lineMem = {}; }
+  function memFor(lang) { if (!lineMem[lang]) lineMem[lang] = {}; return lineMem[lang]; }
+  function saveMem() {
+    try {
+      var k, lang, n = 0;
+      for (lang in lineMem) if (lineMem.hasOwnProperty(lang)) for (k in lineMem[lang]) if (lineMem[lang].hasOwnProperty(k)) n++;
+      if (n > 900) {  // forget older pressure so the pool can breathe again
+        for (lang in lineMem) if (lineMem.hasOwnProperty(lang)) {
+          for (k in lineMem[lang]) if (lineMem[lang].hasOwnProperty(k)) lineMem[lang][k] = Math.floor(lineMem[lang][k] / 2);
+        }
+      }
+      localStorage.setItem("lyrics_linemem", JSON.stringify(lineMem));
+    } catch (e) {}
+  }
+
+  function usedFor(lang) { if (!usedMap[lang]) usedMap[lang] = {}; return usedMap[lang]; }
+
+  /* ---------------- chips + segments ---------------- */
+  function chips(id, arr, key) {
+    var el = $(id);
+    arr.forEach(function (v) {
+      var b = document.createElement("button");
+      b.className = "chip" + (S[key] === v ? " on" : "");
+      b.textContent = v;
+      b.onclick = function () {
+        S[key] = v;
+        Array.prototype.forEach.call(el.children, function (c) { c.classList.toggle("on", c === b); });
+        if (navigator.vibrate) navigator.vibrate(8);
+      };
+      el.appendChild(b);
+    });
+  }
+  function seg(id, arr, key, val) {
+    var el = $(id);
+    arr.forEach(function (v, i) {
+      var b = document.createElement("button");
+      b.textContent = v[0];
+      b.className = S[key] === val(v, i) ? "on" : "";
+      b.onclick = function () {
+        S[key] = val(v, i);
+        Array.prototype.forEach.call(el.children, function (c) { c.classList.toggle("on", c === b); });
+      };
+      el.appendChild(b);
+    });
+  }
+  chips("lang", LANGS, "lang");
+  chips("genre", GENRES, "genre");
+  chips("mood", MOODS, "mood");
+  seg("len", LENS, "len", function (v, i) { return i; });
+  seg("script", SCR, "script", function (v) { return v[1]; });
+
+  /* ---------------- render ---------------- */
+  function render(text) {
+    var out = $("out");
+    out.textContent = "";
+    var titleDone = false;
+    text.split("\n").forEach(function (ln) {
+      var d = document.createElement("div");
+      var t = ln.trim();
+      if (/^\[.*\]$/.test(t)) {
+        d.className = "s";
+        d.textContent = t.replace(/^\[|\]$/g, "");
+      } else if (!titleDone && t) {
+        d.className = "t";
+        d.textContent = t.replace(/^#+\s*|\*+/g, "");
+        titleDone = true;
+      } else {
+        d.className = "l";
+        d.textContent = ln;
+      }
+      out.appendChild(d);
+    });
+  }
+  function err(m) { $("err").textContent = m; $("err").hidden = !m; }
+  function scrollTo(el) { if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+  var toastT;
+  function toast(m) {
+    var el = $("toast");
+    el.textContent = m;
+    el.classList.add("on");
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { el.classList.remove("on"); }, 2600);
+  }
+
+  /* ---------------- AI settings ---------------- */
+  var AI_KEY = "lyrics_studio_ai";
+  function getAI() {
+    var d = { on: false, provider: "gemini", key: "", model: "", base: "" };
+    try { var raw = localStorage.getItem(AI_KEY); if (raw) d = Object.assign(d, JSON.parse(raw)); } catch (e) {}
+    return d;
+  }
+  function setAI(cfg) { try { localStorage.setItem(AI_KEY, JSON.stringify(cfg)); } catch (e) {} }
+
+  async function localCall(base, cfg, prompt) {
+    base = base.replace(/\/+$/, "");
+    var model = (cfg.model || "").trim();
+    if (!model) {
+      var mr = await fetch(base + "/models");
+      if (!mr.ok) throw new Error("models " + mr.status);
+      var mj = await mr.json();
+      model = (mj.data && mj.data[0] && mj.data[0].id) || "llama3.2";
+    }
+    var r = await fetch(base + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.95
+      })
+    });
+    if (!r.ok) throw new Error("local " + r.status);
+    var j = await r.json();
+    return ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
+  }
+
+  async function callAI(cfg, topic) {
+    var prompt = E.promptFor({ lang: S.lang, genre: S.genre, mood: S.mood, len: S.len, script: S.script, topic: topic });
+    if (cfg.provider === "gemini") {
+      var model = cfg.model || "gemini-2.0-flash";
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(cfg.key);
+      var r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.95 } })
+      });
+      var j = await r.json();
+      if (!r.ok) throw new Error((j.error && j.error.message) || "Gemini error " + r.status);
+      var c = j.candidates && j.candidates[0];
+      var parts = (c && c.content && c.content.parts) || [];
+      return parts.map(function (p) { return p.text || ""; }).join("").trim();
+    }
+    if (cfg.provider === "local") {
+      var bases = cfg.base ? [cfg.base] : [
+        "http://127.0.0.1:11434/v1", "http://127.0.0.1:8080/v1",
+        "http://127.0.0.1:1234/v1", "http://127.0.0.1:5000/v1"
+      ];
+      var lastErr = null;
+      for (var bi = 0; bi < bases.length; bi++) {
+        try { return await localCall(bases[bi], cfg, prompt); }
+        catch (e) { lastErr = e; }
+      }
+      throw lastErr || new Error("No local model server answered on this device");
+    }
+    var base = (cfg.base || "https://api.openai.com/v1").replace(/\/+$/, "");
+    var r2 = await fetch(base + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key },
+      body: JSON.stringify({ model: cfg.model || "gpt-4o-mini", messages: [{ role: "user", content: prompt }], temperature: 0.95 })
+    });
+    var j2 = await r2.json();
+    if (!r2.ok) throw new Error((j2.error && j2.error.message) || "API error " + r2.status);
+    return ((j2.choices && j2.choices[0] && j2.choices[0].message && j2.choices[0].message.content) || "").trim();
+  }
+
+  /* ---------------- settings sheet ---------------- */
+  function paintAI() {
+    var cfg = getAI();
+    Array.prototype.forEach.call($("srcSeg").children, function (b) {
+      b.classList.toggle("on", (b.dataset.src === "ai") === !!cfg.on);
+    });
+    $("aiBox").hidden = !cfg.on;
+    Array.prototype.forEach.call($("provSeg").children, function (b) {
+      b.classList.toggle("on", b.dataset.p === cfg.provider);
+    });
+    $("keyIn").value = cfg.key || "";
+    $("modelIn").value = cfg.model || "";
+    $("baseIn").value = cfg.base || "";
+    var isLocal = cfg.provider === "local";
+    var showBase = cfg.provider === "openai" || isLocal;
+    $("baseIn").hidden = !showBase;
+    $("baseLbl").hidden = !showBase;
+    $("keyIn").hidden = isLocal;
+    if ($("keyLbl")) $("keyLbl").hidden = isLocal;
+    $("baseLbl").textContent = isLocal ? "Server (blank = auto-detect)" : "Base URL";
+    $("baseIn").placeholder = isLocal ? "http://127.0.0.1:11434/v1" : "https://api.openai.com/v1";
+    $("modelIn").placeholder = cfg.provider === "gemini" ? "gemini-2.0-flash"
+      : isLocal ? "blank = first model the server lists" : "gpt-4o-mini";
+  }
+  $("gear").onclick = function () { paintAI(); $("sheet").hidden = false; };
+  $("closeSheet").onclick = function () {
+    var cfg = getAI();
+    cfg.key = $("keyIn").value.trim();
+    cfg.model = $("modelIn").value.trim();
+    cfg.base = $("baseIn").value.trim();
+    setAI(cfg);
+    $("sheet").hidden = true;
+    toast(!cfg.on ? "Using the built-in engine"
+      : cfg.provider === "local" ? "Local AI selected — it needs a model server running on this device"
+      : cfg.key ? "AI key saved — lyrics will come from your provider"
+      : "Add a key to use this provider");
+  };
+  $("sheet").onclick = function (e) { if (e.target === $("sheet")) $("closeSheet").onclick(); };
+  Array.prototype.forEach.call($("srcSeg").children, function (b) {
+    b.onclick = function () {
+      var cfg = getAI();
+      cfg.on = b.dataset.src === "ai";
+      setAI(cfg); paintAI();
+    };
+  });
+  Array.prototype.forEach.call($("provSeg").children, function (b) {
+    b.onclick = function () {
+      var cfg = getAI();
+      cfg.provider = b.dataset.p;
+      cfg.on = true;            // choosing a provider means "use the AI model"
+      setAI(cfg); paintAI();
+    };
+  });
+  $("clearAI").onclick = function () {
+    setAI({ on: false, provider: "gemini", key: "", model: "", base: "" });
+    paintAI(); toast("Key removed");
+  };
+
+  /* ---------------- generate ---------------- */
+  async function generate() {
+    if (busy) return;
+    busy = true;
+    var go = $("go");
+    go.disabled = true;
+    go.textContent = "Writing…";
+    err("");
+    var topic = $("topic").value.trim();
+    $("res").hidden = false;
+    $("out").textContent = "…";
+    $("copy").textContent = "Copy";
+
+    var text = "", cfg = getAI();
+    if (cfg.on && (cfg.key || cfg.provider === "local")) {
+      try {
+        text = await callAI(cfg, topic);
+      } catch (e) {
+        toast("AI request failed — wrote it with the built-in engine instead");
+      }
+    }
+    if (!text || !text.trim()) {
+      text = E.buildLyrics({
+        lang: S.lang, genre: S.genre, mood: S.mood, len: S.len,
+        script: S.script, topic: topic, used: usedFor(S.lang),
+        usedLines: memFor(S.lang)
+      });
+      saveMem();
+    }
+    last = text.trim();
+    render(last);
+    addHist(last);
+    scrollTo($("res"));
+    busy = false;
+    go.disabled = false;
+    go.textContent = "✨ Generate lyrics";
+  }
+  $("go").onclick = generate;
+  $("again").onclick = generate;
+  $("topic").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); generate(); }
+  });
+
+  /* ---------------- tools ---------------- */
+  var BRIDGE = (typeof window !== "undefined" && window.AndroidBridge) || null;
+
+  $("copy").onclick = async function () {
+    if (BRIDGE && BRIDGE.copyText) { try { BRIDGE.copyText(last); } catch (e) {} $("copy").textContent = "Copied ✓"; setTimeout(function () { $("copy").textContent = "Copy"; }, 1500); return; }
+    try { await navigator.clipboard.writeText(last); }
+    catch (e) {
+      var r = document.createRange();
+      r.selectNodeContents($("out"));
+      var s = getSelection();
+      s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand("copy"); } catch (_) {}
+    }
+    $("copy").textContent = "Copied ✓";
+    setTimeout(function () { $("copy").textContent = "Copy"; }, 1500);
+  };
+  function fileName() {
+    var t = (last.split("\n")[0] || "lyrics").replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 60);
+    return (t || "lyrics") + ".txt";
+  }
+  $("save").onclick = function () {
+    if (!last) return;
+    if (BRIDGE && BRIDGE.saveText) {
+      try { BRIDGE.saveText(fileName(), last + "\n"); return; } catch (e) {}
+    }
+    var blob = new Blob([last + "\n"], { type: "text/plain;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast("Saved to your downloads");
+  };
+  $("share").onclick = async function () {
+    if (!last) return;
+    if (BRIDGE && BRIDGE.shareText) { try { BRIDGE.shareText(last); return; } catch (e) {} }
+    if (navigator.share) {
+      try { await navigator.share({ title: last.split("\n")[0], text: last }); return; } catch (e) { return; }
+    }
+    try { await navigator.clipboard.writeText(last); toast("Copied — paste it anywhere"); } catch (e) { toast("Sharing isn't available here"); }
+  };
+
+  /* ---------------- history ---------------- */
+  function loadHist() {
+    try { return JSON.parse(localStorage.getItem("lyrics_hist") || "[]"); } catch (e) { return []; }
+  }
+  function addHist(t) {
+    var h = loadHist();
+    h.unshift({ t: t, l: S.lang, d: Date.now() });
+    try { localStorage.setItem("lyrics_hist", JSON.stringify(h.slice(0, 8))); } catch (e) {}
+    showHist();
+  }
+  function showHist() {
+    var h = loadHist(), box = $("hist");
+    box.textContent = "";
+    $("histCard").hidden = !h.length;
+    h.forEach(function (x) {
+      var b = document.createElement("button");
+      b.className = "hi";
+      var s = document.createElement("span");
+      s.textContent = (x.t.split("\n")[0] || "Untitled").replace(/^#+\s*|\*+/g, "");
+      var m = document.createElement("small");
+      m.textContent = x.l;
+      b.append(s, m);
+      b.onclick = function () {
+        last = x.t;
+        $("res").hidden = false;
+        render(last);
+        scrollTo($("res"));
+      };
+      box.appendChild(b);
+    });
+  }
+  showHist();
+})();
+</script>
+</body>
+</html>
